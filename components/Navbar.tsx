@@ -28,7 +28,7 @@ export default function Navbar() {
           <img
             src="/logo-mindorion.png"
             alt="Mindorion"
-            className="h-10 w-auto sm:h-12"
+            className="h-12 w-auto sm:h-14 md:h-16"
           />
         </Link>
 
