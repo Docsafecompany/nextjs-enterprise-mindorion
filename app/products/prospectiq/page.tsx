@@ -65,7 +65,7 @@ export default function ProspectIQPage() {
         <div className="relative">
           <div className="pointer-events-none absolute -inset-6 rounded-3xl bg-gradient-to-tr from-yellow-100 to-orange-100 blur-2xl" />
           <div className="relative overflow-hidden rounded-3xl border bg-white p-6 shadow-sm">
-            <img src="/hero-illustration.png" alt="ProspectIQ preview" className="mx-auto h-[280px] w-auto opacity-70" />
+            <img src="/prospectiq.png" alt="ProspectIQ preview" className="mx-auto h-[280px] w-auto opacity-70" />
             <p className="mt-2 text-center text-sm text-slate-500">Preview illustration</p>
           </div>
         </div>
