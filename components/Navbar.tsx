@@ -25,12 +25,12 @@ export default function Navbar() {
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3">
         {/* Left: Logo */}
         <Link href="/" className="flex items-center gap-2">
-          <img
-            src="/logo-mindorion.png"
-            alt="Mindorion"
-            className="h-12 w-auto sm:h-14 md:h-16"
-          />
-        </Link>
+  <img
+    src="/logo-mindorion.svg"
+    alt="Mindorion"
+    className="h-16 w-auto sm:h-20 md:h-24"
+  />
+</Link>
 
         {/* Middle: Menu */}
         <nav className="hidden items-center gap-6 text-[15px] text-slate-700 md:flex">
