@@ -22,18 +22,18 @@ export default function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 border-b bg-white/90 backdrop-blur">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3">
+      <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-8">
         {/* Left: Logo */}
-       <Link href="/" className="flex items-center gap-2">
-  <img
-    src="/logo-mindorion.png"
-    alt="Mindorion"
-    className="h-24 w-auto sm:h-28 md:h-32"
-  />
-</Link>
+        <Link href="/" className="flex items-center gap-2">
+          <img
+            src="/logo-mindorion.png"
+            alt="Mindorion"
+            className="h-24 w-auto sm:h-28 md:h-32"
+          />
+        </Link>
 
         {/* Middle: Menu */}
-        <nav className="hidden items-center gap-6 text-[15px] text-slate-700 md:flex">
+        <nav className="hidden items-center gap-6 text-[17px] text-slate-700 md:flex">
           <button
             className="hover:text-slate-900"
             onMouseEnter={() => setOpen("products")}
@@ -68,7 +68,7 @@ export default function Navbar() {
         </nav>
 
         {/* Right: Actions */}
-        <div className="hidden items-center gap-3 md:flex">
+        <div className="hidden items-center gap-4 md:flex">
           <Link
             href="/login"
             className="text-[15px] text-slate-700 hover:text-slate-900"
@@ -77,23 +77,23 @@ export default function Navbar() {
           </Link>
           <Link
             href="/contact"
-            className="rounded-xl border border-slate-300 px-3.5 py-2 text-[15px] font-medium hover:bg-slate-50"
+            className="rounded-xl border border-slate-300 px-4 py-2 text-[15px] font-medium hover:bg-slate-50"
           >
             Contact sales
           </Link>
           <Link
             href="/products/docsafe"
-            className="rounded-xl bg-black px-3.5 py-2 text-[15px] font-semibold text-white hover:opacity-90"
+            className="rounded-xl bg-black px-4 py-2 text-[15px] font-semibold text-white hover:opacity-90"
           >
             Get started for free
           </Link>
         </div>
 
-        {/* Mobile burger (just show CTA) */}
+        {/* Mobile CTA only */}
         <div className="md:hidden">
           <Link
             href="/products/docsafe"
-            className="rounded-xl bg-black px-3.5 py-2 text-sm font-semibold text-white"
+            className="rounded-xl bg-black px-4 py-2 text-sm font-semibold text-white"
           >
             Get started
           </Link>
@@ -107,13 +107,11 @@ export default function Navbar() {
           onMouseLeave={() => setOpen(null)}
           className="border-b bg-white"
         >
-          <div className="mx-auto max-w-7xl px-5 py-4 text-sm text-slate-600">
+          <div className="mx-auto max-w-7xl px-6 py-4 text-sm text-slate-600">
             <div className="grid gap-4 md:grid-cols-3">
               <div>
                 <p className="font-medium text-slate-900 capitalize">{open}</p>
-                <p className="mt-1">
-                  Curated links coming soon. (Static placeholder)
-                </p>
+                <p className="mt-1">Curated links coming soon. (Static placeholder)</p>
               </div>
               <div>
                 <a
@@ -135,4 +133,3 @@ export default function Navbar() {
     </header>
   );
 }
-
