@@ -80,16 +80,16 @@ export default function Navbar() {
                     title="DocSafe"
                     desc="Correct & rephrase PDF, Word, and PowerPoint without breaking layout."
                   />
-                  <DropdownItem
-                    href="/products"
-                    title="ProspectIQ (teaser)"
-                    desc="Contextual, industry-tailored outreach at scale."
-                  />
-                  <DropdownItem
-                    href="/solutions"
-                    title="Industry Packs (teaser)"
-                    desc="Specialized templates & automations for your domain."
-                  />
+                 <DropdownItem
+  href="/products/prospectiq"     // ← was /products; make it a real route
+  title="ProspectIQ (teaser)"
+  desc="Contextual, industry-tailored outreach at scale."
+/>
+                 <DropdownItem
+  href="/solutions/industry-packs" // ← was /solutions; make it a real route
+  title="Industry Packs (teaser)"
+  desc="Specialized templates & automations for your domain."
+/>
                   <DropdownItem
                     href="/beta"
                     title="Join the Beta"
