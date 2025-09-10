@@ -5,9 +5,9 @@ export default function Footer() {
         <div className="flex flex-wrap items-center justify-between gap-4">
           <p>© {new Date().getFullYear()} Mindorion</p>
           <nav className="flex gap-4">
-            <a href="/legal/privacy">Confidentialité</a>
-            <a href="/legal/terms">Conditions</a>
-            <a href="/security">Sécurité</a>
+            <a href="/legal/privacy">Privacy</a>
+            <a href="/legal/terms">Terms</a>
+            <a href="/security">Security</a>
           </nav>
         </div>
       </div>
