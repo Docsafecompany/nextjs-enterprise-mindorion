@@ -17,11 +17,12 @@ export default function Page() {
             description="(Teaser) Contextual, industry-tailored outreach at scale."
             href="/products"
           />
-          <ProductCard
-            title="Industry Packs"
-            description="(Teaser) Specialized templates & automations for your domain."
-            href="/solutions"
-          />
+         <ProductCard
+  title="Industry Packs"
+  description="(Teaser) Specialized templates & automations for your domain."
+  href="/solutions/industry-packs"   // ← THIS
+/>
+
         </div>
 
         {/* CTA banner */}
