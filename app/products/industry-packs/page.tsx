@@ -1,7 +1,7 @@
 import Link from "next/link";
 
 const Badge = ({ children }: { children: React.ReactNode }) => (
-  <span className="inline-flex items-center rounded-full bg-indigo-50 px-3 py-1 text-xs font-medium text-indigo-700 ring-1 ring-inset ring-indigo-100">
+  <span className="inline-flex items-center rounded-full bg-yellow-50 px-3 py-1 text-xs font-medium text-yellow-700 ring-1 ring-inset ring-yellow-100">
     {children}
   </span>
 );
@@ -28,7 +28,10 @@ export default function IndustryPacksPage() {
   return (
     <div className="mx-auto max-w-7xl px-6 py-12 md:py-16">
       {/* HERO */}
-      <section className="grid items-center gap-10 md:grid-cols-2">
+      <section className="relative grid items-center gap-10 md:grid-cols-2">
+        {/* Soft page glow (same vibe as ProspectIQ) */}
+        <div className="pointer-events-none absolute -inset-x-10 -top-10 bottom-[-60px] -z-10 bg-gradient-to-b from-yellow-50 via-white to-white" />
+
         <div>
           <div className="flex gap-2">
             <Badge>Coming soon</Badge>
@@ -41,20 +44,34 @@ export default function IndustryPacksPage() {
             Pre-built, industry-specific workflows that combine Mindorion tools, best-practice
             prompts, and guardrails—so teams can adopt AI faster with confidence.
           </p>
+
           <div className="mt-6 flex flex-wrap gap-3">
-            <Link href="/beta" className="rounded-xl bg-indigo-600 px-5 py-2.5 font-semibold text-white hover:bg-indigo-700">
+            <Link
+              href="/beta"
+              className="rounded-xl bg-yellow-500 px-5 py-2.5 font-semibold text-white hover:bg-yellow-600"
+            >
               Request early access
             </Link>
-            <Link href="/contact" className="rounded-xl border border-slate-300 px-5 py-2.5 text-slate-900 hover:bg-slate-50">
+            <Link
+              href="/contact"
+              className="rounded-xl border border-slate-300 px-5 py-2.5 text-slate-900 hover:bg-slate-50"
+            >
               Talk to us
             </Link>
           </div>
+
+          <p className="mt-4 text-xs text-slate-500">Launching later this year · Beta cohorts opening soon</p>
         </div>
 
+        {/* Visual with yellow glow (same as ProspectIQ) */}
         <div className="relative">
-          <div className="pointer-events-none absolute -inset-6 rounded-3xl bg-gradient-to-tr from-indigo-100 to-blue-100 blur-2xl" />
+          <div className="pointer-events-none absolute -inset-6 rounded-3xl bg-gradient-to-tr from-yellow-100 to-orange-100 blur-2xl" />
           <div className="relative overflow-hidden rounded-3xl border bg-white p-6 shadow-sm">
-            <img src="/hero-illustration.png" alt="Industry Packs preview" className="mx-auto h-[280px] w-auto opacity-70" />
+            <img
+              src="/hero-illustration.png"  // use .svg if that's what you uploaded
+              alt="Industry Packs preview"
+              className="mx-auto h-[280px] w-auto opacity-70"
+            />
             <p className="mt-2 text-center text-sm text-slate-500">Preview illustration</p>
           </div>
         </div>
@@ -64,9 +81,9 @@ export default function IndustryPacksPage() {
       <section className="mt-16">
         <h2 className="text-2xl font-bold text-slate-900">Initial packs we’re exploring</h2>
         <div className="mt-6 grid gap-6 sm:grid-cols-3">
-          <Card title="Consulting" desc="Client-ready docs, discovery templates, and QA scripts." />
-          <Card title="Sales" desc="Outbound playbooks and proposal polishers that save hours." />
-          <Card title="Education" desc="Course materials cleanup, rubric assistants, and summaries." />
+          <Card title="Consulting" desc="Client-ready docs, discovery templates, QA scripts, and delivery checklists." />
+          <Card title="Sales" desc="Outbound playbooks, proposal polishers, and meeting-prep assistants." />
+          <Card title="Education" desc="Course material cleanup, rubric assistants, and lesson planners." />
         </div>
       </section>
 
@@ -74,13 +91,13 @@ export default function IndustryPacksPage() {
       <section className="mt-16">
         <h2 className="text-2xl font-bold text-slate-900">FAQ</h2>
         <div className="mt-6 grid gap-4">
-          <FAQ q="What is an Industry Pack?" a="A curated set of templates, prompt patterns, and mini-automations tuned for a specific domain, built on top of Mindorion products." />
-          <FAQ q="Will packs be customizable?" a="Yes. Packs are meant to be adapted to your processes and vocabulary." />
-          <FAQ q="Which industries first?" a="We’re prioritizing Consulting, Sales, and Education based on early demand. Tell us your needs via the beta form." />
+          <FAQ q="What is an Industry Pack?" a="A curated set of templates, prompt patterns, and small automations tuned for a specific domain, built on top of Mindorion tools." />
+          <FAQ q="Can we customize them?" a="Yes. Packs are designed to be adapted to your team vocabulary and workflows." />
+          <FAQ q="Which industries first?" a="We prioritize Consulting, Sales, and Education based on demand. Tell us yours on the beta form." />
         </div>
 
         <div className="mt-8 flex flex-wrap gap-3">
-          <Link href="/beta" className="rounded-xl bg-indigo-600 px-5 py-2.5 font-semibold text-white hover:bg-indigo-700">
+          <Link href="/beta" className="rounded-xl bg-yellow-500 px-5 py-2.5 font-semibold text-white hover:bg-yellow-600">
             Request early access
           </Link>
           <Link href="/contact" className="rounded-xl border border-slate-300 px-5 py-2.5 text-slate-900 hover:bg-slate-50">
@@ -91,3 +108,4 @@ export default function IndustryPacksPage() {
     </div>
   );
 }
+
