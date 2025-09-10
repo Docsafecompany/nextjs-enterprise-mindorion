@@ -5,7 +5,13 @@ import { useState } from "react";
 
 function Caret() {
   return (
-    <svg width="12" height="12" viewBox="0 0 20 20" aria-hidden="true" className="ml-1 inline-block">
+    <svg
+      width="12"
+      height="12"
+      viewBox="0 0 20 20"
+      aria-hidden="true"
+      className="ml-1 inline-block"
+    >
       <path d="M5 7l5 6 5-6H5z" fill="currentColor" />
     </svg>
   );
@@ -16,10 +22,14 @@ export default function Navbar() {
 
   return (
     <header className="sticky top-0 z-50 border-b bg-white/90 backdrop-blur">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-3">
+      <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3">
         {/* Left: Logo */}
         <Link href="/" className="flex items-center gap-2">
-          <img src="/logo-mindorion.png" alt="Mindorion" className="h-7 w-auto" />
+          <img
+            src="/logo-mindorion.svg"
+            alt="Mindorion"
+            className="h-10 w-auto sm:h-12"
+          />
         </Link>
 
         {/* Middle: Menu */}
@@ -52,12 +62,19 @@ export default function Navbar() {
           >
             Resources <Caret />
           </button>
-          <Link href="/pricing" className="hover:text-slate-900">Pricing</Link>
+          <Link href="/pricing" className="hover:text-slate-900">
+            Pricing
+          </Link>
         </nav>
 
         {/* Right: Actions */}
         <div className="hidden items-center gap-3 md:flex">
-          <Link href="/login" className="text-[15px] text-slate-700 hover:text-slate-900">Log in</Link>
+          <Link
+            href="/login"
+            className="text-[15px] text-slate-700 hover:text-slate-900"
+          >
+            Log in
+          </Link>
           <Link
             href="/contact"
             className="rounded-xl border border-slate-300 px-3.5 py-2 text-[15px] font-medium hover:bg-slate-50"
@@ -72,7 +89,7 @@ export default function Navbar() {
           </Link>
         </div>
 
-        {/* Mobile burger (simple) */}
+        {/* Mobile burger (just show CTA) */}
         <div className="md:hidden">
           <Link
             href="/products/docsafe"
@@ -83,7 +100,7 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* (Optional) simple hover dropdown placeholder */}
+      {/* Dropdown placeholder */}
       {open && (
         <div
           onMouseEnter={() => setOpen(open)}
@@ -94,10 +111,23 @@ export default function Navbar() {
             <div className="grid gap-4 md:grid-cols-3">
               <div>
                 <p className="font-medium text-slate-900 capitalize">{open}</p>
-                <p className="mt-1">Curated links coming soon. (Static placeholder)</p>
+                <p className="mt-1">
+                  Curated links coming soon. (Static placeholder)
+                </p>
               </div>
-              <div><a className="text-indigo-600 hover:underline" href="/products/docsafe">DocSafe</a></div>
-              <div><a className="text-indigo-600 hover:underline" href="/beta">Join the beta</a></div>
+              <div>
+                <a
+                  className="text-indigo-600 hover:underline"
+                  href="/products/docsafe"
+                >
+                  DocSafe
+                </a>
+              </div>
+              <div>
+                <a className="text-indigo-600 hover:underline" href="/beta">
+                  Join the beta
+                </a>
+              </div>
             </div>
           </div>
         </div>
@@ -105,3 +135,4 @@ export default function Navbar() {
     </header>
   );
 }
+
