@@ -15,12 +15,12 @@ export default function Page() {
           <ProductCard
             title="ProspectIQ"
             description="(Teaser) Contextual, industry-tailored outreach at scale."
-            href="/products"
+            href="/products/propectiq"
           />
          <ProductCard
   title="Industry Packs"
   description="(Teaser) Specialized templates & automations for your domain."
-  href="/solutions/industry-packs"   // ← THIS
+  href="/products/industry-packs"   // ← THIS
 />
 
         </div>
