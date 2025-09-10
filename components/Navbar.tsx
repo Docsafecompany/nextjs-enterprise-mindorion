@@ -19,7 +19,7 @@ export default function Navbar() {
       <div className="mx-auto flex max-w-7xl items-center justify-between px-5 py-3">
         {/* Left: Logo */}
         <Link href="/" className="flex items-center gap-2">
-          <img src="/logo-mindorion.svg" alt="Mindorion" className="h-7 w-auto" />
+          <img src="/logo-mindorion.png" alt="Mindorion" className="h-7 w-auto" />
         </Link>
 
         {/* Middle: Menu */}
