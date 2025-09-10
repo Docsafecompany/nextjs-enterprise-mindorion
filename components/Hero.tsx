@@ -52,7 +52,7 @@ export default function Hero() {
       <div className="relative">
         <div className="pointer-events-none absolute -inset-6 rounded-3xl bg-gradient-to-tr from-indigo-100 to-blue-100 blur-2xl" />
         <div className="relative overflow-hidden rounded-3xl border bg-white p-6 shadow-sm">
-          <img src="/hero-illustration.svg" alt="Mindorion UI" className="mx-auto h-[300px] w-auto" />
+          <img src="/hero-illustration.png" alt="Mindorion UI" className="mx-auto h-[300px] w-auto" />
         </div>
       </div>
     </section>
