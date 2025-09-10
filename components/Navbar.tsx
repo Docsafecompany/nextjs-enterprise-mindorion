@@ -26,7 +26,7 @@ export default function Navbar() {
         {/* Left: Logo */}
         <Link href="/" className="flex items-center gap-2">
           <img
-            src="/logo-mindorion.svg"
+            src="/logo-mindorion.png"
             alt="Mindorion"
             className="h-10 w-auto sm:h-12"
           />
