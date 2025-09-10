@@ -8,10 +8,10 @@ export default function Navbar() {
           <span className="text-xl">Mindorion</span>
         </Link>
         <nav className="flex items-center gap-6 text-sm">
-          <Link href="/products">Produits</Link>
-          <Link href="/beta">Bêta</Link>
+          <Link href="/products">Products</Link>
+          <Link href="/beta">Beta</Link>
           <Link href="/pricing">Pricing</Link>
-          <Link href="/about">À propos</Link>
+          <Link href="/about">About</Link>
           <Link href="/contact" className="rounded-xl border px-3 py-1.5">Contact</Link>
         </nav>
       </div>
