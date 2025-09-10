@@ -86,7 +86,7 @@ export default function Navbar() {
   desc="Contextual, industry-tailored outreach at scale."
 />
                  <DropdownItem
-  href="/solutions/industry-packs" // ← was /solutions; make it a real route
+  href="/products/industry-packs" // ← was /solutions; make it a real route
   title="Industry Packs (teaser)"
   desc="Specialized templates & automations for your domain."
 />
