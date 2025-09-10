@@ -24,11 +24,11 @@ export default function Navbar() {
     <header className="sticky top-0 z-50 border-b bg-white/90 backdrop-blur">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3">
         {/* Left: Logo */}
-        <Link href="/" className="flex items-center gap-2">
+       <Link href="/" className="flex items-center gap-2">
   <img
     src="/logo-mindorion.svg"
     alt="Mindorion"
-    className="h-16 w-auto sm:h-20 md:h-24"
+    className="h-24 w-auto sm:h-28 md:h-32"
   />
 </Link>
 
