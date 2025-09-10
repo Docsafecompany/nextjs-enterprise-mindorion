@@ -68,7 +68,7 @@ export default function IndustryPacksPage() {
           <div className="pointer-events-none absolute -inset-6 rounded-3xl bg-gradient-to-tr from-yellow-100 to-orange-100 blur-2xl" />
           <div className="relative overflow-hidden rounded-3xl border bg-white p-6 shadow-sm">
             <img
-              src="/hero-illustration.png"  // use .svg if that's what you uploaded
+              src="/industry-packs.png"  // use .svg if that's what you uploaded
               alt="Industry Packs preview"
               className="mx-auto h-[280px] w-auto opacity-70"
             />
