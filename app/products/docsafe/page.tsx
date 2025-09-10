@@ -92,7 +92,7 @@ export default function DocSafePage() {
 
           <div className="mt-6 flex flex-wrap gap-3">
             <a
-              href="https://YOUR_DOCSAFE_URL"
+              href="https://nextjs-boilerplate-qe04hxuka-docsafecompanys-projects.vercel.app"
               className="rounded-xl bg-indigo-600 px-5 py-2.5 font-semibold text-white hover:bg-indigo-700"
             >
               Try it free
