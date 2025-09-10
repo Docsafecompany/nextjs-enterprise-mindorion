@@ -54,7 +54,7 @@ export default function Navbar() {
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2">
             <img
-              src="/logo-mindorion.svg"   // remplace par .png si besoin
+              src="/logo-mindorion.png"   // remplace par .png si besoin
               alt="Mindorion"
               className="h-12 w-auto sm:h-14"
             />
@@ -90,7 +90,7 @@ export default function Navbar() {
                       desc="Contextual, industry-tailored outreach at scale."
                     />
                     <DropdownItem
-                      href="/solutions/industry-packs"
+                      href="/products/industry-packs"
                       title="Industry Packs (teaser)"
                       desc="Specialized templates & automations for your domain."
                     />
