@@ -48,20 +48,28 @@ export default function Navbar() {
         ref={wrapperRef}
         className="mx-auto flex max-w-7xl items-center justify-between px-6 py-6"
       >
+<<<<<<< HEAD
         {/* LEFT: Logo + main nav */}
         <div className="flex items-center gap-8">
           {/* Logo (PLUS GRAND) */}
+=======
+        {/* LEFT: Logo + nav */}
+        <div className="flex items-center gap-8">
+>>>>>>> 3700fc9 (Update Navbar.tsx)
           <Link href="/" className="flex items-center gap-2">
             <img
               src="/logo-mindorion.png"
               alt="Mindorion"
+<<<<<<< HEAD
               className="h-14 w-auto sm:h-16 md:h-20"  /* ← taille augmentée */
+=======
+              className="h-16 w-auto sm:h-20"   // ← Logo agrandi
+>>>>>>> 3700fc9 (Update Navbar.tsx)
             />
           </Link>
 
-          {/* Main nav */}
           <nav className="relative hidden items-center gap-2 text-[16px] text-slate-700 md:flex">
-            {/* PRODUCTS (dropdown) */}
+            {/* PRODUCTS dropdown */}
             <div className="relative">
               <button
                 onClick={() => toggle("products")}
@@ -99,30 +107,29 @@ export default function Navbar() {
                       desc="Try features early and share feedback."
                     />
                   </div>
-                  <div className="mt-2 border-t pt-2">
-                    <Link
-                      href="/pricing"
-                      className="inline-flex items-center rounded-xl px-3 py-2 text-sm text-indigo-600 hover:bg-indigo-50"
-                    >
-                      Pricing →
-                    </Link>
-                  </div>
                 </div>
               )}
             </div>
 
+<<<<<<< HEAD
             {/* ABOUT US */}
+=======
+>>>>>>> 3700fc9 (Update Navbar.tsx)
             <Link href="/about" className="rounded-lg px-3 py-2 hover:bg-slate-50">
               About Us
             </Link>
 
+<<<<<<< HEAD
             {/* PRICING */}
+=======
+>>>>>>> 3700fc9 (Update Navbar.tsx)
             <Link href="/pricing" className="rounded-lg px-3 py-2 hover:bg-slate-50">
               Pricing
             </Link>
           </nav>
         </div>
 
+<<<<<<< HEAD
         {/* RIGHT: Log in + gros bouton Sign up (remplace Contact sales + Get started) */}
         <div className="hidden items-center gap-4 md:flex">
           <Link href="/sign-in" className="text-[15px] text-slate-700 hover:text-slate-900">
@@ -147,12 +154,35 @@ export default function Navbar() {
             Sign up
           </Link>
         </div>
+=======
+        {/* RIGHT: auth actions */}
+        <div className="hidden items-center gap-4 md:flex">
+          <SignedOut>
+            <Link href="/sign-in" className="text-[15px] text-slate-700 hover:text-slate-900">
+              Login
+            </Link>
+            <Link
+              href="/sign-up"
+              className="rounded-xl bg-black px-5 py-2.5 text-[15px] font-semibold text-white hover:opacity-90"
+            >
+              Sign up
+            </Link>
+          </SignedOut>
+
+          <SignedIn>
+            <UserButton afterSignOutUrl="/" />
+          </SignedIn>
+        </div>
+>>>>>>> 3700fc9 (Update Navbar.tsx)
       </div>
     </header>
   );
 }
 
+<<<<<<< HEAD
 /** Item de menu du dropdown Products */
+=======
+>>>>>>> 3700fc9 (Update Navbar.tsx)
 function DropdownItem({
   href,
   title,
