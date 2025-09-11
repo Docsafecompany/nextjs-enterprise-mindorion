@@ -1,4 +1,5 @@
 import Link from "next/link";
+import DocSafeUploader from "../../components/DocSafeUploader"; // ← relative import from app/products/docsafe
 
 /** Small pill used for tags/badges */
 function Badge({ children }: { children: React.ReactNode }) {
@@ -91,8 +92,9 @@ export default function DocSafePage() {
           </p>
 
           <div className="mt-6 flex flex-wrap gap-3">
+            {/* Scroll to inline uploader (no page change) */}
             <a
-              href="https://nextjs-boilerplate-qe04hxuka-docsafecompanys-projects.vercel.app"
+              href="#uploader"
               className="rounded-xl bg-indigo-600 px-5 py-2.5 font-semibold text-white hover:bg-indigo-700"
             >
               Try it free
@@ -115,12 +117,17 @@ export default function DocSafePage() {
           <div className="pointer-events-none absolute -inset-6 rounded-3xl bg-gradient-to-tr from-indigo-100 to-blue-100 blur-2xl" />
           <div className="relative overflow-hidden rounded-3xl border bg-white p-6 shadow-sm">
             <img
-              src="/docsafe.png" // or .svg if you uploaded that
+              src="/docsafe.png"
               alt="DocSafe UI"
               className="mx-auto h-[320px] w-auto"
             />
           </div>
         </div>
+      </section>
+
+      {/* UPLOADER */}
+      <section className="mt-12">
+        <DocSafeUploader />
       </section>
 
       {/* SOCIAL PROOF / QUICK BENEFITS */}
@@ -223,7 +230,7 @@ export default function DocSafePage() {
 
         <div className="mt-8 flex flex-wrap gap-3">
           <a
-            href="https://YOUR_DOCSAFE_URL"
+            href="#uploader"
             className="rounded-xl bg-indigo-600 px-5 py-2.5 font-semibold text-white hover:bg-indigo-700"
           >
             Try DocSafe free
@@ -245,3 +252,4 @@ export default function DocSafePage() {
     </div>
   );
 }
+
