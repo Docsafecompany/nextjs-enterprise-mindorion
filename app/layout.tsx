@@ -1,17 +1,16 @@
 // app/layout.tsx
-export const metadata = {
-  title: "Mindorion",
-  description: "A pragmatic AI software suite for professionals.",
-};
-
+import type { ReactNode } from "react";
 import "../styles/tailwind.css";
 import Navbar from "../components/Navbar";
 import Footer from "../components/Footer";
 import { ClerkProvider } from "@clerk/nextjs";
 
-import { ClerkProvider } from "@clerk/nextjs";
+export const metadata = {
+  title: "Mindorion",
+  description: "A pragmatic AI software suite for professionals.",
+};
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <ClerkProvider>
       <html lang="en">
@@ -24,3 +23,4 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
     </ClerkProvider>
   );
 }
+
