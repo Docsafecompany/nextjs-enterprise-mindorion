@@ -23,7 +23,6 @@ export default function Navbar() {
   const [open, setOpen] = useState<MenuKey>(null);
   const wrapperRef = useRef<HTMLDivElement>(null);
 
-  // Close on outside click / ESC
   useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
       if (!wrapperRef.current) return;
@@ -49,14 +48,14 @@ export default function Navbar() {
         ref={wrapperRef}
         className="mx-auto flex max-w-7xl items-center justify-between px-6 py-6"
       >
-        {/* LEFT: Logo + main nav (Products, About, Pricing) */}
+        {/* LEFT: Logo + main nav */}
         <div className="flex items-center gap-8">
-          {/* Logo */}
+          {/* Logo (PLUS GRAND) */}
           <Link href="/" className="flex items-center gap-2">
             <img
-              src="/logo-mindorion.png"   // remplace par .png si besoin
+              src="/logo-mindorion.png"
               alt="Mindorion"
-              className="h-12 w-auto sm:h-14"
+              className="h-14 w-auto sm:h-16 md:h-20"  /* ← taille augmentée */
             />
           </Link>
 
@@ -113,49 +112,39 @@ export default function Navbar() {
             </div>
 
             {/* ABOUT US */}
-            <Link
-              href="/about"
-              className="rounded-lg px-3 py-2 hover:bg-slate-50"
-            >
+            <Link href="/about" className="rounded-lg px-3 py-2 hover:bg-slate-50">
               About Us
             </Link>
 
             {/* PRICING */}
-            <Link
-              href="/pricing"
-              className="rounded-lg px-3 py-2 hover:bg-slate-50"
-            >
+            <Link href="/pricing" className="rounded-lg px-3 py-2 hover:bg-slate-50">
               Pricing
             </Link>
           </nav>
         </div>
 
-        {/* RIGHT: actions */}
+        {/* RIGHT: Log in + gros bouton Sign up (remplace Contact sales + Get started) */}
         <div className="hidden items-center gap-4 md:flex">
-          <Link href="/login" className="text-[15px] text-slate-700 hover:text-slate-900">
+          <Link href="/sign-in" className="text-[15px] text-slate-700 hover:text-slate-900">
             Log in
           </Link>
+
+          {/* GROS bouton noir Sign up */}
           <Link
-            href="/contact"
-            className="rounded-xl border border-slate-300 px-4 py-2 text-[15px] font-medium hover:bg-slate-50"
+            href="/sign-up"
+            className="rounded-xl bg-black px-5 py-2.5 text-[15px] font-semibold text-white hover:opacity-90"
           >
-            Contact sales
-          </Link>
-          <Link
-            href="/products/docsafe"
-            className="rounded-xl bg-black px-4 py-2 text-[15px] font-semibold text-white hover:opacity-90"
-          >
-            Get started for free
+            Sign up
           </Link>
         </div>
 
-        {/* Mobile: simple CTA */}
+        {/* Mobile CTA */}
         <div className="md:hidden">
           <Link
-            href="/products/docsafe"
+            href="/sign-up"
             className="rounded-xl bg-black px-4 py-2 text-sm font-semibold text-white"
           >
-            Get started
+            Sign up
           </Link>
         </div>
       </div>
@@ -163,7 +152,7 @@ export default function Navbar() {
   );
 }
 
-/** Small card-like item used in the Products dropdown */
+/** Item de menu du dropdown Products */
 function DropdownItem({
   href,
   title,
