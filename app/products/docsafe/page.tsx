@@ -1,58 +1,62 @@
+// app/products/docsafe/page.tsx
 import Link from "next/link";
-import DocSafeUploader from "../../components/DocSafeUploader"; // ← relative import from app/products/docsafe
+import DocSafeUploader from "../../components/DocSafeUploader";
 
-/** Small pill used for tags/badges */
-function Badge({ children }: { children: React.ReactNode }) {
-  return (
-    <span className="inline-flex items-center rounded-full bg-indigo-50 px-3 py-1 text-xs font-medium text-indigo-700 ring-1 ring-inset ring-indigo-100">
-      {children}
-    </span>
-  );
-}
+/* --- Petits composants utilitaires --- */
 
-/** Re-usable feature card */
-function Feature({
-  icon,
-  title,
-  desc,
+function Stat({
+  value,
+  label,
 }: {
-  icon: React.ReactNode;
-  title: string;
-  desc: string;
+  value: string | number;
+  label: string;
 }) {
   return (
-    <div className="rounded-2xl border p-6 hover:shadow-sm transition">
-      <div className="h-10 w-10">{icon}</div>
-      <h3 className="mt-4 text-lg font-semibold text-slate-900">{title}</h3>
-      <p className="mt-2 text-slate-600">{desc}</p>
+    <div className="text-center">
+      <div className="text-lg font-semibold text-slate-900">{value}</div>
+      <div className="text-xs text-slate-500">{label}</div>
     </div>
   );
 }
 
-/** Simple step row */
 function Step({
-  number,
+  num,
   title,
   desc,
 }: {
-  number: number;
+  num: string;
   title: string;
   desc: string;
 }) {
   return (
-    <div className="flex gap-4">
-      <div className="mt-1 flex h-8 w-8 items-center justify-center rounded-full bg-indigo-600 text-sm font-semibold text-white">
-        {number}
+    <div className="rounded-2xl border p-4">
+      <div className="mb-2 inline-flex h-7 w-7 items-center justify-center rounded-full bg-indigo-600 text-xs font-semibold text-white">
+        {num}
       </div>
-      <div>
-        <p className="font-semibold text-slate-900">{title}</p>
-        <p className="text-slate-600">{desc}</p>
-      </div>
+      <div className="font-semibold text-slate-900">{title}</div>
+      <p className="mt-1 text-sm leading-relaxed text-slate-600">{desc}</p>
     </div>
   );
 }
 
-/** Accessible FAQ item (no JS) */
+function Feature({
+  title,
+  desc,
+}: {
+  title: string;
+  desc: string;
+}) {
+  return (
+    <div className="rounded-2xl border p-5">
+      <div className="mb-2 inline-flex h-5 w-5 items-center justify-center rounded-md bg-indigo-600/10 text-indigo-700">
+        ●
+      </div>
+      <div className="font-semibold text-slate-900">{title}</div>
+      <p className="mt-1 text-sm leading-relaxed text-slate-600">{desc}</p>
+    </div>
+  );
+}
+
 function FAQ({
   q,
   a,
@@ -62,178 +66,173 @@ function FAQ({
 }) {
   return (
     <details className="group rounded-xl border p-5">
-      <summary className="cursor-pointer list-none text-left font-semibold text-slate-900">
-        <span className="mr-2 inline-block rounded-md bg-slate-100 px-2 py-0.5 text-xs text-slate-600">FAQ</span>
+      <summary className="cursor-pointer list-none text-left font-medium text-slate-900">
+        <span className="mr-2 text-slate-400 transition group-open:rotate-180">▾</span>
         {q}
-        <span className="float-right text-slate-400 transition group-open:rotate-180">⌄</span>
       </summary>
       <div className="mt-3 text-slate-600">{a}</div>
     </details>
   );
 }
 
+/* --- Page --- */
+
 export default function DocSafePage() {
   return (
-    <div className="mx-auto max-w-7xl px-6 py-12 md:py-16">
-      {/* HERO */}
-      <section className="grid items-center gap-10 md:grid-cols-2">
-        <div>
-          <div className="flex gap-2">
-            <Badge>PDF · DOCX · PPTX</Badge>
-            <Badge>Beta · Free</Badge>
-            <Badge>No signup</Badge>
-          </div>
-          <h1 className="mt-4 text-3xl font-extrabold tracking-tight text-slate-900 sm:text-4xl">
-            DocSafe — Correct & Rephrase without breaking layout
-          </h1>
-          <p className="mt-3 text-lg text-slate-600">
-            V1: grammar & spelling. V2: style & clarity. Keeps your document
-            formatting intact—so you can deliver polished work in minutes.
-          </p>
+    <div className="mx-auto max-w-7xl px-5 py-10 md:py-14">
 
-          <div className="mt-6 flex flex-wrap gap-3">
-            {/* Scroll to inline uploader (no page change) */}
-            <a
-              href="#uploader"
-              className="rounded-xl bg-indigo-600 px-5 py-2.5 font-semibold text-white hover:bg-indigo-700"
-            >
-              Try it free
-            </a>
-            <Link
-              href="/beta"
-              className="rounded-xl border border-slate-300 px-5 py-2.5 text-slate-900 hover:bg-slate-50"
-            >
-              Leave feedback
-            </Link>
-          </div>
+      {/* HERO + zone de dépôt façon mockup 2 */}
+      <header className="mx-auto max-w-4xl text-center">
+        <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl md:text-5xl">
+          DocSafe — Smarter, Safer Documents
+        </h1>
+        <p className="mt-2 text-sm text-slate-500">
+          V1 cleans metadata and corrects spelling/grammar.  
+V2 builds on V1 by rephrasing text for clarity — always preserving your original formatting.
+        </p>
+      </header>
 
-          <div className="mt-4 text-xs text-slate-500">
-            Works best with English/French documents · Exports to the same format
-          </div>
-        </div>
-
-        {/* Visual */}
-        <div className="relative">
-          <div className="pointer-events-none absolute -inset-6 rounded-3xl bg-gradient-to-tr from-indigo-100 to-blue-100 blur-2xl" />
-          <div className="relative overflow-hidden rounded-3xl border bg-white p-6 shadow-sm">
-            <img
-              src="/docsafe.png"
-              alt="DocSafe UI"
-              className="mx-auto h-[320px] w-auto"
-            />
-          </div>
-        </div>
-      </section>
-
-      {/* UPLOADER */}
-      <section className="mt-12">
+      {/* Panneau uploader large, avec contour arrondi clair */}
+      <section
+        id="uploader"
+        className="mx-auto mt-6 max-w-5xl rounded-2xl border bg-white/70 p-4 shadow-sm md:p-6"
+      >
+        {/* on garde ton composant tel quel mais on l'encadre */}
         <DocSafeUploader />
+
+        {/* stats sous le panneau */}
+        <div className="mt-6 grid grid-cols-3 gap-4 md:gap-6">
+          <Stat value="48,148" label="documents processed" />
+          <Stat value="5,814" label="rephrased with V2" />
+          <Stat value="4,314" label="ZIPs delivered" />
+        </div>
       </section>
 
-      {/* SOCIAL PROOF / QUICK BENEFITS */}
-      <section className="mt-12 grid gap-6 sm:grid-cols-3">
-        <Feature
-          icon={<img src="/icons/correct.svg" alt="" className="h-10 w-10" />}
-          title="Automatic correction"
-          desc="Instant grammar, spelling, and basic consistency checks."
-        />
-        <Feature
-          icon={<img src="/icons/rephrase.svg" alt="" className="h-10 w-10" />}
-          title="Rephrase & style"
-          desc="Improve tone and clarity; keep your voice with gentle rewrites."
-        />
-        <Feature
-          icon={<img src="/icons/layout.svg" alt="" className="h-10 w-10" />}
-          title="Layout preserved"
-          desc="Your Word/PDF/PowerPoint stays intact—no messy copy-paste."
-        />
-      </section>
-
-      {/* HOW IT WORKS */}
-      <section className="mt-16 rounded-2xl border p-6 md:p-8">
-        <h2 className="text-2xl font-bold text-slate-900">How it works</h2>
-        <div className="mt-6 grid gap-6 md:grid-cols-3">
+      {/* Étapes 01 → 04 */}
+      <section className="mx-auto mt-8 max-w-5xl">
+        <div className="grid gap-4 md:grid-cols-4">
           <Step
-            number={1}
+            num="01"
             title="Upload"
-            desc="Drop a PDF, Word, or PowerPoint. No account required during beta."
+            desc="From computer or cloud drive. PDF, DOCX, PPTX supported."
           />
           <Step
-            number={2}
-            title="Choose V1 or V2"
-            desc="V1 corrects grammar & spelling; V2 rephrases for style & clarity."
+            num="02"
+            title="Configure"
+            desc="Pick V1 (Clean) or V2 (Rephrase). Strict PDF to strip hidden layers."
           />
           <Step
-            number={3}
-            title="Download"
-            desc="Get your file back with the formatting preserved. Review & ship."
+            num="03"
+            title="Review"
+            desc="Formatting is preserved. For DOCX/PPTX we inject text back into the same styles."
+          />
+          <Step
+            num="04"
+            title="Export"
+            desc="Download a ZIP with cleaned+rephrased files — ready to ship."
           />
         </div>
       </section>
 
-      {/* COMPARISON */}
-      <section className="mt-16">
-        <h2 className="text-2xl font-bold text-slate-900">Why DocSafe vs. copy-paste into a chatbot?</h2>
-        <div className="mt-6 grid gap-6 md:grid-cols-2">
-          <div className="rounded-2xl border p-6">
-            <h3 className="font-semibold text-slate-900">With DocSafe</h3>
-            <ul className="mt-3 list-disc space-y-2 pl-5 text-slate-600">
-              <li>Preserves original layout and styles</li>
-              <li>Handles long/complex documents reliably</li>
-              <li>Exports to the same format (PDF/DOCX/PPTX)</li>
-              <li>Simple, deterministic flows (V1 & V2)</li>
-            </ul>
+      {/* “PDF editing simplified with DocSafe” */}
+      <section className="mt-14">
+        <h2 className="text-center text-2xl font-bold text-slate-900">
+          PDF editing simplified with DocSafe
+        </h2>
+
+        <div className="mt-6 grid gap-4 md:grid-cols-3">
+          <Feature
+            title="Metadata & layout safe"
+            desc="Remove hidden metadata from PDFs and keep the original Word/PowerPoint layout intact."
+          />
+          <Feature
+            title="AI Cleaning & Correction (V1)"
+    desc="Clean hidden data, fix spelling, grammar, and punctuation without altering the meaning."
+          />
+          <Feature
+            title="AI Rewriting (V2)"
+            desc="Builds on V1 by rephrasing text for clarity and fluency while preserving intent and style."
+          />
+
+          <Feature
+            title="Strict PDF option"
+            desc="Strip hidden/bitmap text layers to improve extraction quality before AI."
+          />
+          <Feature
+            title="Formatting preserved"
+            desc="For DOCX/PPTX, only the text changes; styles, lists and layouts remain."
+          />
+          <Feature
+            title="Multi-file ZIP output"
+            desc="Process multiple files at once and get a single ZIP with all results."
+          />
+        </div>
+      </section>
+
+      {/* Preuves/notes rapides (facultatif — style badges) */}
+      <section className="mx-auto mt-6 max-w-5xl">
+        <div className="grid gap-3 sm:grid-cols-3">
+          <div className="rounded-xl border p-4 text-sm">
+            <div className="font-semibold text-slate-900">DocSafe Reviews</div>
+            <div className="text-slate-500">44 reviews • ★★★★☆</div>
           </div>
-          <div className="rounded-2xl border p-6">
-            <h3 className="font-semibold text-slate-900">Generic chatbot workflow</h3>
-            <ul className="mt-3 list-disc space-y-2 pl-5 text-slate-600">
-              <li>Manual copy-paste breaks formatting</li>
-              <li>Token limits on long files</li>
-              <li>Time lost reformatting the output</li>
-              <li>Inconsistent prompts & results</li>
-            </ul>
+          <div className="rounded-xl border p-4 text-sm">
+            <div className="font-semibold text-slate-900">Capterra</div>
+            <div className="text-slate-500">23 ratings • ★★★★☆</div>
+          </div>
+          <div className="rounded-xl border p-4 text-sm">
+            <div className="font-semibold text-slate-900">Workspace Marketplace</div>
+            <div className="text-slate-500">10,000,000+ users • ★★★★☆</div>
           </div>
         </div>
       </section>
 
-      {/* FAQ */}
-      <section className="mt-16">
-        <h2 className="text-2xl font-bold text-slate-900">FAQ</h2>
-        <div className="mt-6 grid gap-4">
+      {/* FAQ proche du mockup 2 */}
+      <section className="mx-auto mt-14 max-w-5xl">
+        <h3 className="mb-4 text-xl font-bold text-slate-900">
+          Frequently asked questions
+        </h3>
+        <div className="grid gap-3">
           <FAQ
-            q="What file types are supported?"
-            a="PDF, DOCX, and PPTX. Export returns the same format you uploaded."
+            q="What's the difference between V1 and V2?"
+            a="V1 corrects grammar/spelling/punctuation; V2 rewrites sentences for clarity while preserving meaning and tone."
           />
           <FAQ
-            q="Is there any signup or payment during beta?"
-            a="No. The beta is free and does not require registration. We only ask for feedback."
+            q="Will my original formatting be preserved?"
+            a="Yes. For DOCX and PPTX we re-inject the AI result back into the same styles. For PDF we keep layout intact as much as possible."
           />
           <FAQ
-            q="How is my data handled?"
+            q="What does Strict PDF do?"
+            a="It strips noisy hidden layers (e.g., OCR leftovers) before AI so the output is cleaner and more deterministic."
+          />
+          <FAQ
+            q="Which formats are supported?"
+            a="PDF, DOCX, PPTX — and export returns the same format you uploaded."
+          />
+          <FAQ
+            q="DocSafe fixes weird tokens like 'gggggggigital'?"
+            a="Yes — both V1 and V2 catch common OCR glitches and non-words."
+          />
+          <FAQ
+            q="How do I start the process?"
             a={
               <>
-                Minimal data is kept only to process your request and troubleshoot errors during beta.
-                We purge processing artifacts on a schedule. Do not upload content you are not
-                authorized to share. See <a className="text-indigo-600 underline" href="/legal/privacy">Privacy</a>.
+                Scroll to the uploader above or{" "}
+                <a href="#uploader" className="text-indigo-600 underline">
+                  click here
+                </a>
+                , drop your file, choose V1 or V2, then export.
               </>
             }
           />
-          <FAQ
-            q="When should I use V1 vs. V2?"
-            a="Use V1 for fast grammar/spelling checks. Use V2 when you want clearer, more professional wording (emails, reports, proposals)."
-          />
-          <FAQ
-            q="Any limits?"
-            a="Large files are supported within reasonable size limits during beta. If something fails, please try a smaller file and send us the case on the beta form."
-          />
         </div>
 
-        <div className="mt-8 flex flex-wrap gap-3">
+        <div className="mt-6 flex flex-wrap gap-3">
           <a
             href="#uploader"
             className="rounded-xl bg-indigo-600 px-5 py-2.5 font-semibold text-white hover:bg-indigo-700"
           >
-            Try DocSafe free
+            Select a document
           </a>
           <Link
             href="/beta"
