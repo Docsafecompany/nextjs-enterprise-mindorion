@@ -11,8 +11,9 @@ export default function Page() {
           Empowering Work with <span className="text-indigo-600">Mindorion</span>
         </h1>
         <p className="mt-4 text-lg text-slate-600">
-          Smart, human-centered software for freelancers, students, and small businesses.
-          Optimize productivity and collaboration with tools built for the future of work.
+          Smart, human-centered software for freelancers, students, and small
+          businesses. Optimize productivity and collaboration with tools built
+          for the future of work.
         </p>
 
         {/* Boutons */}
@@ -54,7 +55,6 @@ export default function Page() {
             description="(Teaser) Specialized templates & automations, industry workflows to save time. Adopt best practices instantly with templates."
             href="/products/industry-packs"
           />
-          
         </div>
 
         {/* CTA banner */}
@@ -70,6 +70,64 @@ export default function Page() {
             Try DocSafe
           </a>
         </div>
+
+        {/* ===== Nouvelle Section type iLovePDF ===== */}
+        <div className="mt-20 space-y-8">
+          {/* Bandeau Premium avec bouton Pricing */}
+          <div className="rounded-2xl bg-amber-50/80 ring-1 ring-amber-100 p-6 md:p-8">
+            <div className="flex flex-col items-start justify-between gap-6 md:flex-row md:items-center">
+              <div>
+                <h3 className="text-xl font-semibold text-slate-900">
+                  Get more with <span className="text-indigo-600">Mindorion</span> Premium
+                </h3>
+                <ul className="mt-3 list-disc space-y-1 pl-5 text-slate-700">
+                  <li>Full access to our upcoming tools & industry packs.</li>
+                  <li>Priority compute & quicker support.</li>
+                  <li>Early features and private betas.</li>
+                </ul>
+              </div>
+
+              <Link
+                href="/pricing"
+                className="inline-flex items-center rounded-xl bg-amber-400 px-5 py-2.5 font-semibold text-slate-900 shadow-sm hover:bg-amber-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-amber-500"
+              >
+                See Pricing
+              </Link>
+            </div>
+          </div>
+
+          {/* Carte DocSafe mise en avant */}
+          <div className="rounded-2xl border border-slate-200 bg-white p-6 md:p-8 shadow-sm">
+            <div className="grid gap-6 md:grid-cols-[280px,1fr,auto] md:items-center">
+              {/* Placeholder visuel */}
+              <div className="mx-auto h-40 w-full max-w-[280px] rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 ring-1 ring-slate-300/60 md:mx-0 md:h-44" />
+
+              <div className="space-y-2">
+                <h4 className="text-lg font-semibold text-slate-900">
+                  Image & document editing made simple with{" "}
+                  <span className="text-indigo-600">DocSafe</span>
+                </h4>
+                <p className="text-slate-600">
+                  Clean, correct, and rephrase content while preserving layout. Work on PDF,
+                  Word, and PowerPoint in one place. Secure by design and built for teams.
+                </p>
+                <p className="text-slate-500">
+                  Try it free during beta and share your feedback with us.
+                </p>
+              </div>
+
+              <div className="justify-self-start md:justify-self-end">
+                <Link
+                  href="/products/docsafe"
+                  className="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-5 py-2.5 font-semibold text-white shadow-sm hover:bg-indigo-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
+                >
+                  Go to DocSafe
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+        {/* ===== Fin Nouvelle Section ===== */}
       </section>
     </>
   );
