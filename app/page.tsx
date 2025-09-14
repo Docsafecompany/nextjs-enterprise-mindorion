@@ -1,15 +1,47 @@
 import Hero from "../components/Hero";
 import ProductCard from "../components/ProductCard";
+import Link from "next/link";
 
 export default function Page() {
   return (
     <>
-      <Hero />
-      <section className="mx-auto mt-8 max-w-7xl px-5 pb-20">
+      {/* HERO avec les boutons modifiés */}
+      <section className="mx-auto mt-20 max-w-5xl px-5 text-center">
+        <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl">
+          Empowering Work with <span className="text-indigo-600">Mindorion</span>
+        </h1>
+        <p className="mt-4 text-lg text-slate-600">
+          Smart, human-centered software for freelancers, students, and small businesses.
+          Optimize productivity and collaboration with tools built for the future of work.
+        </p>
+
+        {/* Boutons */}
+        <div className="mt-8 flex items-center justify-center gap-4">
+          {/* Sign up */}
+          <Link
+            href="/sign-up"
+            className="rounded-xl bg-slate-900 px-6 py-3 text-white font-semibold hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-900"
+          >
+            Sign up
+          </Link>
+
+          {/* About Us */}
+          <Link
+            href="/about"
+            className="rounded-xl border border-slate-300 px-6 py-3 text-slate-900 font-semibold hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-300"
+          >
+            About Us
+          </Link>
+        </div>
+      </section>
+
+      {/* Section Produits */}
+      <section className="mx-auto mt-16 max-w-7xl px-5 pb-20">
+        <h2 className="text-2xl font-bold text-center mb-10">Our First Tools</h2>
         <div className="grid gap-6 md:grid-cols-3">
           <ProductCard
             title="DocSafe"
-            description="Correct & rephrase PDF, Word, and PowerPoint without breaking layout."
+            description="Clean, correct, and rephrase your documents (PDF, Word, PowerPoint) without breaking their layout, while removing hidden risks."
             href="/products/docsafe"
           />
           <ProductCard
@@ -17,18 +49,20 @@ export default function Page() {
             description="(Teaser) Contextual, industry-tailored outreach at scale."
             href="/products/propectiq"
           />
-         <ProductCard
-  title="Industry Packs"
-  description="(Teaser) Specialized templates & automations for your domain."
-  href="/products/industry-packs"   // ← THIS
-/>
-
+          <ProductCard
+            title="Industry Packs"
+            description="(Teaser) Specialized templates & automations, industry workflows to save time. Adopt best practices instantly with templates."
+            href="/products/industry-packs"
+          />
+          
         </div>
 
         {/* CTA banner */}
         <div className="mt-16 rounded-2xl bg-black p-10 text-center text-white">
           <h2 className="text-2xl font-bold">Start with DocSafe today</h2>
-          <p className="mt-2 opacity-90">Beta free. No signup required. Try it and share your feedback.</p>
+          <p className="mt-2 opacity-90">
+            Beta free. No signup required. Try it and share your feedback.
+          </p>
           <a
             href="/products/docsafe"
             className="mt-6 inline-block rounded-xl bg-white px-6 py-3 font-semibold text-black hover:opacity-90"
@@ -40,3 +74,4 @@ export default function Page() {
     </>
   );
 }
+
