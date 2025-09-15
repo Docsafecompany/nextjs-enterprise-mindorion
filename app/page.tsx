@@ -5,19 +5,28 @@ import Link from "next/link";
 export default function Page() {
   return (
     <>
-      {/* HERO avec les boutons modifiés */}
-      <section className="mx-auto mt-20 max-w-5xl px-5 text-center">
-        <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl">
+      {/* HERO avec les boutons modifiés + logo en fond */}
+      <section className="relative mx-auto mt-20 max-w-5xl px-5 text-center">
+        {/* Logo watermark derrière le hero */}
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-10">
+          <img
+            src="/public/logo-mindorion.png" // <-- ajuste le chemin si besoin (ex: /logo.svg)
+            alt="Mindorion logo"
+            className="w-[520px] max-w-full h-auto"
+          />
+        </div>
+
+        <h1 className="relative text-4xl font-extrabold tracking-tight sm:text-5xl md:text-6xl">
           Empowering Work with <span className="text-indigo-600">Mindorion</span>
         </h1>
-        <p className="mt-4 text-lg text-slate-600">
+        <p className="relative mt-4 text-lg text-slate-600">
           Smart, human-centered software for freelancers, students, and small
           businesses. Optimize productivity and collaboration with tools built
           for the future of work.
         </p>
 
         {/* Boutons */}
-        <div className="mt-8 flex items-center justify-center gap-4">
+        <div className="relative mt-8 flex items-center justify-center gap-4">
           {/* Sign up */}
           <Link
             href="/sign-up"
@@ -45,7 +54,7 @@ export default function Page() {
             description="Clean, correct, and rephrase your documents (PDF, Word, PowerPoint) without breaking their layout, while removing hidden risks."
             href="/products/docsafe"
           />
-          <ProductCard
+        <ProductCard
             title="ProspectIQ"
             description="(Teaser) Contextual, industry-tailored outreach at scale."
             href="/products/propectiq"
@@ -57,19 +66,7 @@ export default function Page() {
           />
         </div>
 
-        {/* CTA banner */}
-        <div className="mt-16 rounded-2xl bg-black p-10 text-center text-white">
-          <h2 className="text-2xl font-bold">Start with DocSafe today</h2>
-          <p className="mt-2 opacity-90">
-            Beta free. No signup required. Try it and share your feedback.
-          </p>
-          <a
-            href="/products/docsafe"
-            className="mt-6 inline-block rounded-xl bg-white px-6 py-3 font-semibold text-black hover:opacity-90"
-          >
-            Try DocSafe
-          </a>
-        </div>
+        {/* (SUPPRIMÉ) CTA banner noir 'Start with DocSafe today' */}
 
         {/* ===== Nouvelle Section type iLovePDF ===== */}
         <div className="mt-20 space-y-8">
@@ -132,4 +129,5 @@ export default function Page() {
     </>
   );
 }
+
 
