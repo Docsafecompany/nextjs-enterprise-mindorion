@@ -24,8 +24,8 @@ export default function Navbar() {
           {/* --- Logo Mindorion --- */}
           <Link href="/" className="flex items-center gap-2 shrink-0">
             <img
-              src="/assets/logo-mindorion.png"  // ✅ chemin corrigé
-              alt="Mindorion"
+              src="/logo-mindorion.png"   // ✅ ton fichier dans /public
+              alt="Mindorion logo"
               className="h-8 w-8"
             />
             <span className="text-base font-semibold text-slate-900">
