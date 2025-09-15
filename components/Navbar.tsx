@@ -6,6 +6,7 @@ import { useState, useEffect, useRef } from "react";
 export default function Navbar() {
   const [open, setOpen] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Fermer avec ESC (optionnel mais pratique)
   useEffect(() => {
@@ -16,29 +17,39 @@ export default function Navbar() {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
+  const handleEnter = () => {
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    setOpen(true);
+  };
+
+  const handleLeave = () => {
+    timeoutRef.current = setTimeout(() => {
+      setOpen(false);
+    }, 250); // délai pour traverser l’espace
+  };
+
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-white/90 backdrop-blur">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3">
-        {/* LEFT: logo + nav (left-aligned) */}
+        {/* LEFT: logo + nav */}
         <div className="flex items-center gap-8">
           {/* --- Logo Mindorion --- */}
-         <Link href="/" className="flex items-center shrink-0">
-  <img
-    src="/logo-mindorion.png"   // ✅ ton fichier dans /public
-    alt="Mindorion logo"
-    className="h-14 w-auto"     //⬅️ taille augmentée (avant c’était h-8)
-  />
-</Link>
-
+          <Link href="/" className="flex items-center shrink-0">
+            <img
+              src="/logo-mindorion.png"   // ✅ fichier dans /public
+              alt="Mindorion logo"
+              className="h-24 w-auto"     // ⬅️ taille doublée
+            />
+          </Link>
 
           {/* --- Nav --- */}
           <nav className="hidden items-center gap-8 md:flex">
-            {/* Wrapper qui gère l'open sur TOUTE la zone (bouton + panneau) */}
+            {/* Wrapper gère hover + délai */}
             <div
               ref={wrapRef}
               className="relative"
-              onMouseEnter={() => setOpen(true)}
-              onMouseLeave={() => setOpen(false)}
+              onMouseEnter={handleEnter}
+              onMouseLeave={handleLeave}
             >
               <button
                 type="button"
@@ -49,7 +60,6 @@ export default function Navbar() {
                 Products <span className={`transition ${open ? "rotate-180" : ""}`}>▾</span>
               </button>
 
-              {/* Panneau : reste ouvert tant que le curseur est dans wrapRef */}
               {open && (
                 <div
                   className="absolute left-0 mt-3 w-[560px] rounded-2xl border bg-white p-6 shadow-xl"
