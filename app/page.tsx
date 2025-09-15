@@ -10,7 +10,7 @@ export default function Page() {
         {/* Logo watermark derrière le hero */}
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-10">
           <img
-            src="/assets/logo-mindorion.png" // <-- ajuste le chemin si besoin (ex: /logo.svg)
+            src="/public/logo-mindorion.png" // <-- ajuste le chemin si besoin (ex: /logo.svg)
             alt="Mindorion logo"
             className="w-[520px] max-w-full h-auto"
           />
@@ -57,7 +57,7 @@ export default function Page() {
         <ProductCard
             title="ProspectIQ"
             description="(Teaser) Contextual, industry-tailored outreach at scale."
-            href="/products/propectiq"
+            href="/products/prospectiq"
           />
           <ProductCard
             title="Industry Packs"
