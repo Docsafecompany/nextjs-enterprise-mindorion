@@ -1,4 +1,4 @@
-import Link from "next/link";
+Ôªøimport Link from "next/link";
 
 const features = {
   free: [
@@ -12,7 +12,7 @@ const features = {
     "Limits: 50 MB/file, 100 pages/day, 500 pages/month, 5 jobs/day",
     "Download links valid 1h",
     "Community support",
-    "ìPowered by DocSafeî in report",
+    "‚ÄúPowered by DocSafe‚Äù in report",
   ],
   starter: [
     "1 user",
@@ -22,10 +22,10 @@ const features = {
     "V2 rephrase: unlimited (within monthly pages)",
     "File size up to 150 MB",
     "Quotas: 5,000 pages/month, 200 jobs/day",
-    "Remove ìPowered byî + add your logo",
+    "Remove ‚ÄúPowered by‚Äù + add your logo",
     "Download links valid 7 days",
     "AI settings: tone, default language, mini glossary (100 terms)",
-    "Email support (24ñ48h)",
+    "Email support (24‚Äì48h)",
     "30-day free trial",
   ],
   pro: [
@@ -53,7 +53,7 @@ export default function PricingPage() {
           Simple pricing for every team
         </h1>
         <p className="mt-3 text-slate-600">
-          Clean, correct, and rephrase documents at scale ó with layout preserved.
+          Clean, correct, and rephrase documents at scale ‚Äî with layout preserved.
         </p>
       </section>
 
@@ -115,8 +115,8 @@ export default function PricingPage() {
         {/* Notes / fair use */}
         <div className="mx-auto mt-8 max-w-4xl text-xs leading-relaxed text-slate-500">
           <p>
-            <strong>Notes.</strong> ìPagesî count the total extracted text before AI (multi-layer PDFs
-            may increase logical pages). Password-protected files arenít processed yet. We do not store
+            <strong>Notes.</strong> ‚ÄúPages‚Äù count the total extracted text before AI (multi-layer PDFs
+            may increase logical pages). Password-protected files aren‚Äôt processed yet. We do not store
             documents after delivery; anonymized usage metadata may be retained for analytics (opt-out on Pro).
           </p>
         </div>
