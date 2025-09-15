@@ -36,3 +36,8 @@ storybook-static/
 /.npm-only-allow
 # clerk configuration (can include secrets)
 /.clerk/
+
+.clerk/
+.clerk/**
+.env.local
+.env.local.txt
