@@ -22,16 +22,14 @@ export default function Navbar() {
         {/* LEFT: logo + nav (left-aligned) */}
         <div className="flex items-center gap-8">
           {/* --- Logo Mindorion --- */}
-          <Link href="/" className="flex items-center gap-2 shrink-0">
-            <img
-              src="/logo-mindorion.png"   // ✅ ton fichier dans /public
-              alt="Mindorion logo"
-              className="h-8 w-8"
-            />
-            <span className="text-base font-semibold text-slate-900">
-              Mindorion
-            </span>
-          </Link>
+         <Link href="/" className="flex items-center shrink-0">
+  <img
+    src="/logo-mindorion.png"   // ✅ ton fichier dans /public
+    alt="Mindorion logo"
+    className="h-14 w-auto"     //⬅️ taille augmentée (avant c’était h-8)
+  />
+</Link>
+
 
           {/* --- Nav --- */}
           <nav className="hidden items-center gap-8 md:flex">
