@@ -1,57 +1,65 @@
 ﻿"use client";
 
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
+  const wrapRef = useRef<HTMLDivElement>(null);
+
+  // Fermer avec ESC (optionnel mais pratique)
+  useEffect(() => {
+    function onKey(e: KeyboardEvent) {
+      if (e.key === "Escape") setOpen(false);
+    }
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, []);
 
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-white/90 backdrop-blur">
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3">
-        {/* LEFT: brand + left-aligned nav */}
+        {/* LEFT: logo + nav (left-aligned) */}
         <div className="flex items-center gap-8">
-          {/* Logo */}
+          {/* --- Logo Mindorion --- */}
           <Link href="/" className="flex items-center gap-2 shrink-0">
-            <img src="public/logo-mindorion.png" alt="Mindorion" className="h-8 w-8" />
-            <span className="text-base font-semibold text-slate-900">Mindorion</span>
+            <img
+              src="/assets/logo-mindorion.png"  // ✅ chemin corrigé
+              alt="Mindorion"
+              className="h-8 w-8"
+            />
+            <span className="text-base font-semibold text-slate-900">
+              Mindorion
+            </span>
           </Link>
 
-          {/* Main nav (left aligned) */}
+          {/* --- Nav --- */}
           <nav className="hidden items-center gap-8 md:flex">
-            {/* Products (hoverable mega menu) */}
+            {/* Wrapper qui gère l'open sur TOUTE la zone (bouton + panneau) */}
             <div
+              ref={wrapRef}
               className="relative"
               onMouseEnter={() => setOpen(true)}
               onMouseLeave={() => setOpen(false)}
             >
               <button
+                type="button"
                 className="inline-flex items-center gap-1 text-slate-800 hover:text-indigo-600"
                 aria-haspopup="menu"
                 aria-expanded={open}
-                onFocus={() => setOpen(true)}
-                onBlur={(e) => {
-                  // ferme si le focus sort du conteneur
-                  const related = e.relatedTarget as HTMLElement | null;
-                  if (!related || !e.currentTarget.parentElement?.contains(related)) {
-                    setOpen(false);
-                  }
-                }}
               >
-                Products
-                <span className={`transition ${open ? "rotate-180" : ""}`}>▾</span>
+                Products <span className={`transition ${open ? "rotate-180" : ""}`}>▾</span>
               </button>
 
-              {/* Panel : reste ouvert quand on le survole */}
+              {/* Panneau : reste ouvert tant que le curseur est dans wrapRef */}
               {open && (
                 <div
                   className="absolute left-0 mt-3 w-[560px] rounded-2xl border bg-white p-6 shadow-xl"
-                  onMouseEnter={() => setOpen(true)}
-                  onMouseLeave={() => setOpen(false)}
+                  role="menu"
                 >
                   <div className="grid grid-cols-2 gap-6">
                     <div className="space-y-4">
-                      <Link href="/products/docsafe" className="block group">
+                      <Link href="/products/docsafe" className="block group" role="menuitem">
                         <div className="font-semibold text-slate-900 group-hover:text-indigo-600">
                           DocSafe
                         </div>
@@ -60,7 +68,7 @@ export default function Navbar() {
                         </p>
                       </Link>
 
-                      <Link href="/products/industry-packs" className="block group">
+                      <Link href="/products/industry-packs" className="block group" role="menuitem">
                         <div className="font-semibold text-slate-900 group-hover:text-indigo-600">
                           Industry Packs (teaser)
                         </div>
@@ -71,7 +79,7 @@ export default function Navbar() {
                     </div>
 
                     <div className="space-y-4">
-                      <Link href="/products/prospectiq" className="block group">
+                      <Link href="/products/prospectiq" className="block group" role="menuitem">
                         <div className="font-semibold text-slate-900 group-hover:text-indigo-600">
                           ProspectIQ (teaser)
                         </div>
@@ -80,7 +88,7 @@ export default function Navbar() {
                         </p>
                       </Link>
 
-                      <Link href="/beta" className="block group">
+                      <Link href="/beta" className="block group" role="menuitem">
                         <div className="font-semibold text-slate-900 group-hover:text-indigo-600">
                           Join the Beta
                         </div>
@@ -103,7 +111,7 @@ export default function Navbar() {
           </nav>
         </div>
 
-        {/* RIGHT: auth actions */}
+        {/* RIGHT: auth */}
         <div className="hidden items-center gap-4 md:flex">
           <Link href="/sign-in" className="text-sm text-slate-700 hover:text-indigo-600">
             Log in
