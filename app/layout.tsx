@@ -1,4 +1,4 @@
-// app/layout.tsx
+﻿// app/layout.tsx
 import type { ReactNode } from "react";
 import "../styles/tailwind.css";
 import Navbar from "../components/Navbar";
@@ -10,6 +10,7 @@ export const metadata = {
   description: "A pragmatic AI software suite for professionals.",
 };
 
+export const dynamic = 'force-dynamic';
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <ClerkProvider>
