@@ -1,22 +1,26 @@
 "use client";
 
-import React, { useCallback, useMemo, useRef, useState } from "react";
-import { FREE_LIMIT, getFreeUsed, hasFreeLeft, incFreeUsed } from "@/lib/freeQuota";
-
-type Mode = "correct" | "rephrase";
+import { useCallback, useRef, useState } from "react";
+import { FREE_LIMIT, getFreeUsed, incFreeUsed } from "@/lib/freeQuota";
 
 export default function DocSafeUploader() {
   const inputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
-  const [msg, setMsg] = useState<{ type: "info" | "success" | "error"; text: string } | null>(null);
+  const [msg, setMsg] = useState<string | null>(null);
   const [used, setUsed] = useState<number>(() => getFreeUsed());
-  const left = useMemo(() => Math.max(FREE_LIMIT - used, 0), [used]);
+  const left = Math.max(FREE_LIMIT - used, 0);
 
+  // open file picker
   const onBrowse = () => inputRef.current?.click();
 
+  // DnD handlers
+  const prevent = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+  };
   const onDrop = useCallback(
     (e: React.DragEvent<HTMLDivElement>) => {
-      e.preventDefault();
+      prevent(e);
       if (busy) return;
       const files = e.dataTransfer?.files;
       handleFiles(files);
@@ -24,151 +28,101 @@ export default function DocSafeUploader() {
     [busy]
   );
 
-  const prevent = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-  };
-
   async function handleFiles(files: FileList | null) {
     if (!files || files.length === 0) return;
 
-    const file = files[0];
-    const mode: Mode = "correct"; // TODO: exposer un sélecteur si tu veux activer "rephrase"
-
-    if (!hasFreeLeft()) {
-      setMsg({
-        type: "error",
-        text: `Limite gratuite atteinte (${FREE_LIMIT}). Créez un compte ou consultez la page Pricing.`,
-      });
-      return;
-    }
-
     setBusy(true);
-    setMsg({ type: "info", text: "Traitement en cours…" });
+    setMsg(null);
 
     try {
+      // Only V1 (clean + correct) — no UI switch.
       const fd = new FormData();
-      fd.append("file", file);
-      fd.append("mode", mode);
+      fd.append("file", files[0]);
+      fd.append("mode", "correct"); // fixed to V1
       fd.append("lang", "auto");
 
       const res = await fetch("/api/docsafe", { method: "POST", body: fd });
-
       if (res.status === 402 || res.status === 429) {
-        setMsg({
-          type: "error",
-          text: `Limite gratuite atteinte (${FREE_LIMIT}). Créez un compte ou consultez la page Pricing.`,
-        });
+        setMsg(`Free limit reached (${FREE_LIMIT}). Create an account or see Pricing.`);
         return;
       }
       if (!res.ok) {
         const t = await res.text();
-        throw new Error(t || "Échec du traitement");
+        throw new Error(t || "Processing failed");
       }
 
-      // Si ton backend renvoie un fichier (stream), tu peux déclencher un download ici.
-      // Placeholder: lecture JSON éventuelle
-      const ct = res.headers.get("content-type") || "";
-      if (ct.includes("application/json")) {
-        await res.json().catch(() => ({}));
-      }
-
-      // Succès → incrémente et affiche le message
+      // success -> increase counter (client-side mirror of server cookie)
       const next = incFreeUsed();
       setUsed(next);
-      setMsg({
-        type: "success",
-        text: "Traitement réussi. (Branche ici le téléchargement si besoin.)",
-      });
+      setMsg("Processed successfully. (Hook your download here.)");
     } catch (e: any) {
-      setMsg({ type: "error", text: e?.message || "Erreur inattendue" });
+      setMsg(e?.message || "Unexpected error");
     } finally {
       setBusy(false);
     }
   }
 
   return (
-    <div className="grid gap-4 md:grid-cols-2">
-      {/* Zone de drop + bouton */}
+    <div className="space-y-3">
+      {/* Hidden native input; we use our own 'Upload file' button */}
+      <input
+        ref={inputRef}
+        type="file"
+        accept=".pdf,.doc,.docx,.ppt,.pptx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.presentationml.presentation"
+        className="hidden"
+        onChange={(e) => handleFiles(e.target.files)}
+      />
+
+      {/* Drag & drop area + custom button */}
       <div
-        className="rounded-2xl border border-dashed bg-gray-50 p-6 text-center transition hover:bg-gray-100"
-        onDrop={onDrop}
         onDragOver={prevent}
         onDragEnter={prevent}
+        onDrop={onDrop}
+        className="rounded-2xl border border-dashed bg-gray-50 p-6 text-center"
       >
-        <div className="mx-auto grid max-w-sm place-items-center gap-3">
-          <div className="h-16 w-16 rounded-full border" />
-          <p className="text-sm text-gray-600">Glissez-déposez votre fichier ici</p>
-          <p className="text-xs text-gray-500">ou cliquez “Importer un fichier”</p>
+        <p className="text-sm text-gray-700 font-medium">Drop a PDF, DOCX, or PPTX here</p>
+        <p className="mt-1 text-xs text-gray-500">or</p>
 
-          <input
-            ref={inputRef}
-            type="file"
-            accept=".pdf,.doc,.docx,.ppt,.pptx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.presentationml.presentation"
-            className="hidden"
-            onChange={(e) => handleFiles(e.target.files)}
-          />
-
-          <button
-            type="button"
-            disabled={busy}
-            onClick={onBrowse}
-            className="mt-3 rounded-xl bg-black px-5 py-2.5 text-sm font-semibold text-white hover:bg-gray-800 disabled:opacity-60"
-          >
-            {busy ? "Import en cours…" : "Importer un fichier"}
-          </button>
-
-          {/* Compteur visible */}
-          <div className="mt-2 text-xs text-gray-600">
-            <span className="font-semibold">{FREE_LIMIT - left}/{FREE_LIMIT}</span> utilisés •{" "}
-            <span className={left > 0 ? "text-green-600" : "text-red-600"}>
-              {left} restant{left > 1 ? "s" : ""}
-            </span>
-          </div>
-
-          {/* Message feedback */}
-          {msg && (
-            <div
-              className={`mt-2 rounded-lg px-3 py-2 text-xs ${
-                msg.type === "error"
-                  ? "bg-red-50 text-red-700"
-                  : msg.type === "success"
-                  ? "bg-green-50 text-green-700"
-                  : "bg-gray-50 text-gray-700"
-              }`}
-            >
-              {msg.text}{" "}
-              {msg.type !== "success" && (
-                <>
-                  <a href="/pricing" className="font-semibold text-indigo-600 hover:text-indigo-500">
-                    Pricing
-                  </a>{" "}
-                  • <a href="/sign-up" className="font-semibold text-indigo-600 hover:text-indigo-500">Créer un compte</a>
-                </>
-              )}
-            </div>
-          )}
-        </div>
+        {/* THIS replaces the native 'Choose file' */}
+        <button
+          type="button"
+          onClick={onBrowse}
+          disabled={busy}
+          className="mt-2 rounded-xl bg-black px-4 py-2.5 text-sm font-semibold text-white hover:bg-gray-800 disabled:opacity-60"
+        >
+          {busy ? "Uploading…" : "Upload file"}
+        </button>
       </div>
 
-      {/* Panneau d’aide compact à droite */}
-      <div className="rounded-2xl border p-4">
-        <h4 className="font-semibold text-slate-900">Conseils</h4>
-        <ul className="mt-2 list-disc space-y-1 pl-5 text-sm text-slate-600">
-          <li>Formats: PDF, DOCX, PPTX.</li>
-          <li>V1: Nettoyage + correction orthographe/grammaire.</li>
-          <li>V2: Reformulation pour plus de clarté (sur demande).</li>
-          <li>La mise en page et la structure restent intactes.</li>
-          <li>Limite gratuite anonyme: {FREE_LIMIT} fichiers.</li>
-        </ul>
-        <div className="mt-3 text-xs text-slate-500">
-          Besoin de plus ?{" "}
+      {/* Process Button (kept for parity with your layout) */}
+      <div className="flex items-center justify-start">
+        <button
+          type="button"
+          onClick={() => onBrowse()}
+          disabled={busy}
+          className="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-60"
+        >
+          Process & Download
+        </button>
+      </div>
+
+      {/* Quota + message */}
+      <div className="text-xs text-gray-500">
+        Free beta limit: {FREE_LIMIT} files (anonymous). Used: {Math.min(used, FREE_LIMIT)}/{FREE_LIMIT}
+      </div>
+
+      {msg && (
+        <div className="rounded-lg bg-gray-50 px-3 py-2 text-xs text-gray-700">
+          {msg}{" "}
           <a href="/pricing" className="font-semibold text-indigo-600 hover:text-indigo-500">
-            Voir les offres
+            Pricing
+          </a>{" "}
+          •{" "}
+          <a href="/sign-up" className="font-semibold text-indigo-600 hover:text-indigo-500">
+            Create account
           </a>
-          .
         </div>
-      </div>
+      )}
     </div>
   );
 }

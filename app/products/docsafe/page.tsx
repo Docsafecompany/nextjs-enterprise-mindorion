@@ -3,7 +3,7 @@
 import Link from "next/link";
 import DocSafeUploader from "../../components/DocSafeUploader";
 
-/* Small UI helpers */
+/* petit helper visuel */
 function Card({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="rounded-2xl border px-4 py-5 md:px-5">
@@ -44,12 +44,9 @@ export default function DocSafePage() {
       </header>
 
       {/* TRY IT NOW */}
-      <section
-        id="try"
-        className="mt-8 rounded-2xl border bg-white p-5 shadow-sm md:p-6"
-      >
+      <section id="try" className="mt-8 rounded-2xl border bg-white p-5 shadow-sm md:p-6">
         <div className="grid gap-6 md:grid-cols-2">
-          {/* Left: bullets + copy */}
+          {/* Left: bullets */}
           <div>
             <h2 className="text-lg font-semibold text-slate-900">Try it now</h2>
             <p className="mt-2 text-sm text-slate-600">
@@ -75,7 +72,7 @@ export default function DocSafePage() {
             </div>
           </div>
 
-          {/* Right: uploader → sans V1/V2 ni options */}
+          {/* Right: uploader (sans V1/V2/Language/Strict PDF) */}
           <div id="uploader-box">
             <DocSafeUploader />
           </div>
@@ -123,7 +120,8 @@ export default function DocSafePage() {
           </li>
         </ol>
 
-        <div className="mt-6 flex flex-wrap items-center gap-3">
+        {/* CTAs centrés */}
+        <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
           <a
             href="#try"
             className="rounded-xl bg-black px-5 py-2.5 text-sm font-semibold text-white hover:bg-gray-800"
