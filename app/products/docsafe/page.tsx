@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import DocSafeUploader from "@/components/DocSafeUploader";
+// ⬇️ use RELATIVE path so it works without tsconfig paths
+import DocSafeUploader from "../../components/DocSafeUploader";
 
 /* helper */
 function Card({ title, children }: { title: string; children: React.ReactNode }) {
@@ -14,12 +15,10 @@ function Card({ title, children }: { title: string; children: React.ReactNode })
 }
 
 export default function DocSafePage() {
-  /** Ouvre l’uploader de droite et scroll jusqu’à lui */
   const openUploader = (e: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => {
     e.preventDefault();
     const el = document.getElementById("uploader-box");
     el?.scrollIntoView({ behavior: "smooth", block: "center" });
-    // petit délai pour laisser scroller avant d’ouvrir le picker
     setTimeout(() => window.dispatchEvent(new Event("docsafe:open-picker")), 300);
   };
 
@@ -82,7 +81,7 @@ export default function DocSafePage() {
             </div>
           </div>
 
-          {/* Right: uploader (no V1/V2 etc.) */}
+          {/* Right: uploader */}
           <div id="uploader-box">
             <DocSafeUploader />
           </div>
@@ -150,4 +149,5 @@ export default function DocSafePage() {
     </main>
   );
 }
+
 

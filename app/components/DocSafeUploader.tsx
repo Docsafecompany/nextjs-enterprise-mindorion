@@ -30,11 +30,14 @@ export default function DocSafeUploader() {
   /** Open file picker */
   const openPicker = () => inputRef.current?.click();
 
-  /** Listen to global event from the left CTA */
+  /** Listen to global event that triggers the picker */
   useEffect(() => {
     const handler = () => openPicker();
-    window.addEventListener("docsafe:open-picker", handler as EventListener);
-    return () => window.removeEventListener("docsafe:open-picker", handler as EventListener);
+    // TS-safe add/remove
+    window.addEventListener("docsafe:open-picker", handler as unknown as EventListener);
+    return () => {
+      window.removeEventListener("docsafe:open-picker", handler as unknown as EventListener);
+    };
   }, []);
 
   /** DnD helpers */
@@ -163,5 +166,6 @@ export default function DocSafeUploader() {
     </div>
   );
 }
+
 
 
