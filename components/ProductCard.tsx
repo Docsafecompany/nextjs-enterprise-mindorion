@@ -1,15 +1,24 @@
 import Link from "next/link";
 
-export default function ProductCard(
-  { title, description, href }: { title: string; description: string; href: string }
-) {
+export default function ProductCard({
+  title,
+  description,
+  href,
+}: {
+  title: string;
+  description: string;
+  href: string;
+}) {
   return (
-    <Link href={href} className="group rounded-2xl border p-5 hover:shadow-lg">
-      <h3 className="text-lg font-semibold">{title}</h3>
+    <div className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm">
+      <h3 className="text-base font-semibold text-slate-900">{title}</h3>
       <p className="mt-2 text-sm text-slate-600">{description}</p>
-      <span className="mt-4 inline-block text-sm text-indigo-600 group-hover:underline">
+      <Link
+        href={href}
+        className="mt-4 inline-flex text-sm font-semibold text-indigo-600 hover:text-indigo-500"
+      >
         Learn more →
-      </span>
-    </Link>
+      </Link>
+    </div>
   );
 }

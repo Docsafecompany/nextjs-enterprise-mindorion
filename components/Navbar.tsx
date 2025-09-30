@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
-// ⬇️ Clerk (shows avatar + menu when signed in)
+// Clerk (avatar/menu when signed in)
 import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 
 export default function Navbar() {
@@ -30,18 +30,18 @@ export default function Navbar() {
       <div className="mx-auto flex max-w-7xl items-center justify-between px-6 py-3">
         {/* LEFT: logo + nav */}
         <div className="flex items-center gap-8">
-          {/* Logo (image only, no wordmark) */}
+          {/* Logo */}
           <Link href="/" className="flex shrink-0 items-center">
             <img
-              src="/logo-mindorion.png" /* your /public/logo-mindorion.png */
+              src="/logo-mindorion.png" /* public/logo-mindorion.png */
               alt="Mindorion"
-              className="h-24 w-auto"   /* bigger logo */
+              className="h-24 w-auto"
             />
           </Link>
 
-          {/* Primary nav (left aligned) */}
+          {/* Primary nav */}
           <nav className="hidden items-center gap-8 md:flex">
-            {/* Products menu (hover with grace period, panel stays open while hovered) */}
+            {/* Products menu */}
             <div
               ref={wrapRef}
               className="relative"
@@ -63,50 +63,65 @@ export default function Navbar() {
                   role="menu"
                 >
                   <div className="grid grid-cols-2 gap-6">
-                    <div className="space-y-4">
-                      <Link href="/products/docsafe" className="block group" role="menuitem">
-                        <div className="font-semibold text-slate-900 group-hover:text-indigo-600">
-                          DocSafe
-                        </div>
-                        <p className="mt-1 text-sm text-slate-600">
-                          Correct & rephrase PDF, Word & PowerPoint without breaking layout.
-                        </p>
-                      </Link>
+                    {/* DocSafe (active) */}
+                    <Link href="/products/docsafe" className="block group" role="menuitem">
+                      <div className="font-semibold text-slate-900 group-hover:text-indigo-600">
+                        DocSafe
+                      </div>
+                      <p className="mt-1 text-sm text-slate-600">
+                        Correct & rephrase PDF, Word & PowerPoint without breaking layout.
+                      </p>
+                    </Link>
 
-                      <Link href="/products/industry-packs" className="block group" role="menuitem">
-                        <div className="font-semibold text-slate-900 group-hover:text-indigo-600">
-                          Industry Packs (teaser)
-                        </div>
-                        <p className="mt-1 text-sm text-slate-600">
-                          Specialized templates & automations for your domain.
-                        </p>
-                      </Link>
+                    {/* Industry Packs (disabled/teaser) */}
+                    <div
+                      className="block group opacity-40 cursor-not-allowed select-none"
+                      aria-disabled
+                      role="menuitem"
+                    >
+                      <div className="font-semibold text-slate-900">
+                        Industry Packs{" "}
+                        <span className="ml-1 rounded bg-gray-100 px-1.5 py-0.5 text-[10px] font-semibold">
+                          Coming soon
+                        </span>
+                      </div>
+                      <p className="mt-1 text-sm text-slate-600">
+                        Specialized templates & automations for your domain.
+                      </p>
                     </div>
 
-                    <div className="space-y-4">
-                      <Link href="/products/prospectiq" className="block group" role="menuitem">
-                        <div className="font-semibold text-slate-900 group-hover:text-indigo-600">
-                          ProspectIQ (teaser)
-                        </div>
-                        <p className="mt-1 text-sm text-slate-600">
-                          Contextual, industry-tailored outreach at scale.
-                        </p>
-                      </Link>
-
-                      <Link href="/beta" className="block group" role="menuitem">
-                        <div className="font-semibold text-slate-900 group-hover:text-indigo-600">
-                          Join the Beta
-                        </div>
-                        <p className="mt-1 text-sm text-slate-600">
-                          Try features early and share feedback.
-                        </p>
-                      </Link>
+                    {/* ProspectIQ (disabled/teaser) */}
+                    <div
+                      className="block group opacity-40 cursor-not-allowed select-none"
+                      aria-disabled
+                      role="menuitem"
+                    >
+                      <div className="font-semibold text-slate-900">
+                        ProspectIQ{" "}
+                        <span className="ml-1 rounded bg-gray-100 px-1.5 py-0.5 text-[10px] font-semibold">
+                          Coming soon
+                        </span>
+                      </div>
+                      <p className="mt-1 text-sm text-slate-600">
+                        Contextual, industry-tailored outreach at scale.
+                      </p>
                     </div>
+
+                    {/* Join the Beta (optional link stays active) */}
+                    <Link href="/beta" className="block group" role="menuitem">
+                      <div className="font-semibold text-slate-900 group-hover:text-indigo-600">
+                        Join the Beta
+                      </div>
+                      <p className="mt-1 text-sm text-slate-600">
+                        Try features early and share feedback.
+                      </p>
+                    </Link>
                   </div>
                 </div>
               )}
             </div>
 
+            {/* Keep About & Pricing clickable */}
             <Link href="/about" className="text-slate-800 hover:text-indigo-600">
               About Us
             </Link>
@@ -118,7 +133,6 @@ export default function Navbar() {
 
         {/* RIGHT: auth area */}
         <div className="hidden items-center gap-4 md:flex">
-          {/* When signed OUT → show Log in / Sign up */}
           <SignedOut>
             <Link href="/sign-in" className="text-sm text-slate-700 hover:text-indigo-600">
               Log in
@@ -131,7 +145,6 @@ export default function Navbar() {
             </Link>
           </SignedOut>
 
-          {/* When signed IN → show avatar with menu (Clerk) */}
           <SignedIn>
             <UserButton
               afterSignOutUrl="/"
@@ -147,3 +160,4 @@ export default function Navbar() {
     </header>
   );
 }
+

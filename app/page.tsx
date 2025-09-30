@@ -5,12 +5,11 @@ import Link from "next/link";
 export default function Page() {
   return (
     <>
-      {/* HERO avec les boutons modifiés + logo en fond */}
+      {/* HERO with watermark logo */}
       <section className="relative mx-auto mt-20 max-w-5xl px-5 text-center">
-        {/* Logo watermark derrière le hero */}
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center opacity-10">
           <img
-            src="/logo-mindorion.png" // <-- ajuste le chemin si besoin (ex: /logo.svg)
+            src="/logo-mindorion.png"
             alt="Mindorion logo"
             className="w-[520px] max-w-full h-auto"
           />
@@ -25,17 +24,13 @@ export default function Page() {
           for the future of work.
         </p>
 
-        {/* Boutons */}
         <div className="relative mt-8 flex items-center justify-center gap-4">
-          {/* Sign up */}
           <Link
             href="/sign-up"
             className="rounded-xl bg-slate-900 px-6 py-3 text-white font-semibold hover:opacity-90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-900"
           >
             Sign up
           </Link>
-
-          {/* About Us */}
           <Link
             href="/about"
             className="rounded-xl border border-slate-300 px-6 py-3 text-slate-900 font-semibold hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slate-300"
@@ -45,32 +40,39 @@ export default function Page() {
         </div>
       </section>
 
-      {/* Section Produits */}
+      {/* Products section */}
       <section className="mx-auto mt-16 max-w-7xl px-5 pb-20">
         <h2 className="text-2xl font-bold text-center mb-10">Our First Tools</h2>
         <div className="grid gap-6 md:grid-cols-3">
+          {/* DocSafe: active card */}
           <ProductCard
             title="DocSafe"
             description="Clean, correct, and rephrase your documents (PDF, Word, PowerPoint) without breaking their layout, while removing hidden risks."
             href="/products/docsafe"
           />
-        <ProductCard
-            title="ProspectIQ"
-            description="(Teaser) Contextual, industry-tailored outreach at scale."
-            href="/products/prospectiq"
-          />
-          <ProductCard
-            title="Industry Packs"
-            description="(Teaser) Specialized templates & automations, industry workflows to save time. Adopt best practices instantly with templates."
-            href="/products/industry-packs"
-          />
+
+          {/* ProspectIQ: disabled/teaser */}
+          <div className="opacity-40 pointer-events-none select-none">
+            <ProductCard
+              title="ProspectIQ"
+              description="(Teaser) Contextual, industry-tailored outreach at scale."
+              href="#"
+            />
+          </div>
+
+          {/* Industry Packs: disabled/teaser */}
+          <div className="opacity-40 pointer-events-none select-none">
+            <ProductCard
+              title="Industry Packs"
+              description="(Teaser) Specialized templates & automations, industry workflows to save time. Adopt best practices instantly with templates."
+              href="#"
+            />
+          </div>
         </div>
 
-        {/* (SUPPRIMÉ) CTA banner noir 'Start with DocSafe today' */}
-
-        {/* ===== Nouvelle Section type iLovePDF ===== */}
+        {/* ===== iLovePDF-style banner ===== */}
         <div className="mt-20 space-y-8">
-          {/* Bandeau Premium avec bouton Pricing */}
+          {/* Premium banner with Pricing button */}
           <div className="rounded-2xl bg-amber-50/80 ring-1 ring-amber-100 p-6 md:p-8">
             <div className="flex flex-col items-start justify-between gap-6 md:flex-row md:items-center">
               <div>
@@ -93,15 +95,15 @@ export default function Page() {
             </div>
           </div>
 
-          {/* Carte DocSafe mise en avant */}
+          {/* DocSafe featured card */}
           <div className="rounded-2xl border border-slate-200 bg-white p-6 md:p-8 shadow-sm">
             <div className="grid gap-6 md:grid-cols-[280px,1fr,auto] md:items-center">
-              <Image
-  src="/docsafeexemple.png"
-  alt="DocSafe Example"
-  width={280}
-  height={176} // roughly 16:10; adjust if needed
-              <div className="mx-auto h-40 w-full max-w-[280px] rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 ring-1 ring-slate-300/60 md:mx-0 md:h-44" />
+              {/* Replace the gray placeholder with an actual image from /public */}
+              <img
+                src="/docsafeexemple.png"   /* put the file in public/docsafeexemple.png */
+                alt="DocSafe example"
+                className="mx-auto md:mx-0 h-40 md:h-44 w-full max-w-[280px] rounded-xl ring-1 ring-slate-300/60 object-cover"
+              />
 
               <div className="space-y-2">
                 <h4 className="text-lg font-semibold text-slate-900">
@@ -128,9 +130,10 @@ export default function Page() {
             </div>
           </div>
         </div>
-        {/* ===== Fin Nouvelle Section ===== */}
+        {/* ===== End ===== */}
       </section>
     </>
   );
 }
+
 
