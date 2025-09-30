@@ -2,15 +2,9 @@
 import Link from "next/link";
 import DocSafeUploader from "../../components/DocSafeUploader";
 
-/* --- Petits composants utilitaires --- */
+/* --- Small utility components --- */
 
-function Stat({
-  value,
-  label,
-}: {
-  value: string | number;
-  label: string;
-}) {
+function Stat({ value, label }: { value: string | number; label: string }) {
   return (
     <div className="text-center">
       <div className="text-lg font-semibold text-slate-900">{value}</div>
@@ -39,13 +33,7 @@ function Step({
   );
 }
 
-function Feature({
-  title,
-  desc,
-}: {
-  title: string;
-  desc: string;
-}) {
+function Feature({ title, desc }: { title: string; desc: string }) {
   return (
     <div className="rounded-2xl border p-5">
       <div className="mb-2 inline-flex h-5 w-5 items-center justify-center rounded-md bg-indigo-600/10 text-indigo-700">
@@ -57,13 +45,7 @@ function Feature({
   );
 }
 
-function FAQ({
-  q,
-  a,
-}: {
-  q: string;
-  a: React.ReactNode;
-}) {
+function FAQ({ q, a }: { q: string; a: React.ReactNode }) {
   return (
     <details className="group rounded-xl border p-5">
       <summary className="cursor-pointer list-none text-left font-medium text-slate-900">
@@ -80,27 +62,40 @@ function FAQ({
 export default function DocSafePage() {
   return (
     <div className="mx-auto max-w-7xl px-5 py-10 md:py-14">
-
-      {/* HERO + zone de dépôt façon mockup 2 */}
+      {/* HERO — direct & explicit */}
       <header className="mx-auto max-w-4xl text-center">
         <h1 className="text-3xl font-extrabold tracking-tight sm:text-4xl md:text-5xl">
           DocSafe — Smarter, Safer Documents
         </h1>
         <p className="mt-2 text-sm text-slate-500">
-          V1 cleans metadata and corrects spelling/grammar.  
-V2 builds on V1 by rephrasing text for clarity — always preserving your original formatting.
+          V1 cleans metadata and corrects spelling/grammar. V2 builds on V1 by rephrasing text
+          for clarity — always preserving your original formatting.
         </p>
+        <div className="mt-5 flex items-center justify-center gap-3">
+          <a
+            href="#uploader"
+            className="rounded-xl bg-black px-5 py-2.5 text-sm font-semibold text-white hover:bg-gray-800"
+          >
+            Try DocSafe Free
+          </a>
+          <Link
+            href="/pricing"
+            className="rounded-xl border px-5 py-2.5 text-sm font-semibold hover:bg-gray-50"
+          >
+            See Pricing
+          </Link>
+        </div>
       </header>
 
-      {/* Panneau uploader large, avec contour arrondi clair */}
+      {/* Uploader panel */}
       <section
         id="uploader"
         className="mx-auto mt-6 max-w-5xl rounded-2xl border bg-white/70 p-4 shadow-sm md:p-6"
       >
-        {/* on garde ton composant tel quel mais on l'encadre */}
+        {/* Your uploader stays as-is, just framed nicely */}
         <DocSafeUploader />
 
-        {/* stats sous le panneau */}
+        {/* Quick stats (social proof) */}
         <div className="mt-6 grid grid-cols-3 gap-4 md:gap-6">
           <Stat value="48,148" label="documents processed" />
           <Stat value="5,814" label="rephrased with V2" />
@@ -108,7 +103,7 @@ V2 builds on V1 by rephrasing text for clarity — always preserving your origin
         </div>
       </section>
 
-      {/* Étapes 01 → 04 */}
+      {/* 4 steps — clear mental model */}
       <section className="mx-auto mt-8 max-w-5xl">
         <div className="grid gap-4 md:grid-cols-4">
           <Step
@@ -119,7 +114,7 @@ V2 builds on V1 by rephrasing text for clarity — always preserving your origin
           <Step
             num="02"
             title="Configure"
-            desc="Pick V1 (Clean) or V2 (Rephrase). Strict PDF to strip hidden layers."
+            desc="Pick V1 (Clean) or V2 (Rephrase). Use Strict PDF to strip noisy hidden layers."
           />
           <Step
             num="03"
@@ -129,47 +124,46 @@ V2 builds on V1 by rephrasing text for clarity — always preserving your origin
           <Step
             num="04"
             title="Export"
-            desc="Download a ZIP with cleaned+rephrased files — ready to ship."
+            desc="Download as original format or get a ZIP with multiple files."
           />
         </div>
       </section>
 
-      {/* “PDF editing simplified with DocSafe” */}
+      {/* Benefits focused on PDF editing */}
       <section className="mt-14">
         <h2 className="text-center text-2xl font-bold text-slate-900">
-          PDF editing simplified with DocSafe
+          PDF & document cleanup made simple
         </h2>
 
         <div className="mt-6 grid gap-4 md:grid-cols-3">
           <Feature
             title="Metadata & layout safe"
-            desc="Remove hidden metadata from PDFs and keep the original Word/PowerPoint layout intact."
+            desc="Remove hidden metadata from PDFs and keep original Word/PowerPoint layout intact."
           />
           <Feature
             title="AI Cleaning & Correction (V1)"
-    desc="Clean hidden data, fix spelling, grammar, and punctuation without altering the meaning."
+            desc="Clean hidden data, fix spelling, grammar, and punctuation without altering the meaning."
           />
           <Feature
             title="AI Rewriting (V2)"
             desc="Builds on V1 by rephrasing text for clarity and fluency while preserving intent and style."
           />
-
           <Feature
             title="Strict PDF option"
-            desc="Strip hidden/bitmap text layers to improve extraction quality before AI."
+            desc="Strip hidden/bitmap layers (e.g., OCR leftovers) to improve extraction before AI."
           />
           <Feature
             title="Formatting preserved"
-            desc="For DOCX/PPTX, only the text changes; styles, lists and layouts remain."
+            desc="For DOCX/PPTX, only the text changes; styles, lists and layouts remain consistent."
           />
           <Feature
             title="Multi-file ZIP output"
-            desc="Process multiple files at once and get a single ZIP with all results."
+            desc="Process multiple files at once and receive a single ZIP with all results."
           />
         </div>
       </section>
 
-      {/* Preuves/notes rapides (facultatif — style badges) */}
+      {/* Small trust badges (optional) */}
       <section className="mx-auto mt-6 max-w-5xl">
         <div className="grid gap-3 sm:grid-cols-3">
           <div className="rounded-xl border p-4 text-sm">
@@ -187,11 +181,9 @@ V2 builds on V1 by rephrasing text for clarity — always preserving your origin
         </div>
       </section>
 
-      {/* FAQ proche du mockup 2 */}
+      {/* FAQ — short & practical */}
       <section className="mx-auto mt-14 max-w-5xl">
-        <h3 className="mb-4 text-xl font-bold text-slate-900">
-          Frequently asked questions
-        </h3>
+        <h3 className="mb-4 text-xl font-bold text-slate-900">Frequently asked questions</h3>
         <div className="grid gap-3">
           <FAQ
             q="What's the difference between V1 and V2?"
@@ -205,19 +197,13 @@ V2 builds on V1 by rephrasing text for clarity — always preserving your origin
             q="What does Strict PDF do?"
             a="It strips noisy hidden layers (e.g., OCR leftovers) before AI so the output is cleaner and more deterministic."
           />
-          <FAQ
-            q="Which formats are supported?"
-            a="PDF, DOCX, PPTX — and export returns the same format you uploaded."
-          />
-          <FAQ
-            q="DocSafe fixes weird tokens like 'gggggggigital'?"
-            a="Yes — both V1 and V2 catch common OCR glitches and non-words."
-          />
+          <FAQ q="Which formats are supported?" a="PDF, DOCX, PPTX — export returns the same format you uploaded." />
+          <FAQ q="Does DocSafe fix weird tokens like “gggggggigital”?" a="Yes — both V1 and V2 catch common OCR glitches and non-words." />
           <FAQ
             q="How do I start the process?"
             a={
               <>
-                Scroll to the uploader above or{" "}
+                Go to the uploader above or{" "}
                 <a href="#uploader" className="text-indigo-600 underline">
                   click here
                 </a>
@@ -251,4 +237,6 @@ V2 builds on V1 by rephrasing text for clarity — always preserving your origin
     </div>
   );
 }
+
+
 

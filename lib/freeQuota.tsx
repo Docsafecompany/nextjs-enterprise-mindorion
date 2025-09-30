@@ -8,15 +8,19 @@ export function getFreeUsed(): number {
   return Number.isNaN(n) ? 0 : n;
 }
 
+export function setFreeUsed(n: number) {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(KEY, String(n));
+  document.cookie = `${KEY}=${n}; Path=/; Max-Age=${60 * 60 * 24 * 2}; SameSite=Lax`;
+}
+
 export function incFreeUsed(): number {
-  if (typeof window === "undefined") return 0;
   const next = getFreeUsed() + 1;
-  localStorage.setItem(KEY, String(next));
-  // Optional: also set a cookie to help server-side checks
-  document.cookie = `${KEY}=${next}; Path=/; Max-Age=${60 * 60 * 24 * 2}; SameSite=Lax`;
+  setFreeUsed(next);
   return next;
 }
 
 export function hasFreeLeft(): boolean {
   return getFreeUsed() < FREE_LIMIT;
 }
+
