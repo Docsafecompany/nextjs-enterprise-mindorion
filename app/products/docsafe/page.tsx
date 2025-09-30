@@ -1,4 +1,3 @@
-// app/products/docsafe/page.tsx
 "use client";
 
 import Link from "next/link";
@@ -59,10 +58,10 @@ export default function DocSafePage() {
             </p>
 
             <ul className="mt-4 space-y-2 text-sm text-slate-700">
-              <li className="flex gap-2"><span>•</span><span>Remove hidden metadata & comments</span></li>
-              <li className="flex gap-2"><span>•</span><span>Correct spelling & grammar</span></li>
-              <li className="flex gap-2"><span>•</span><span>Keep formatting & structure</span></li>
-              <li className="flex gap-2"><span>•</span><span>Export multiple files in a ZIP</span></li>
+              <li>• Remove hidden metadata & comments</li>
+              <li>• Correct spelling & grammar</li>
+              <li>• Keep formatting & structure</li>
+              <li>• Export multiple files in a ZIP</li>
             </ul>
 
             <div className="mt-4">
@@ -76,7 +75,7 @@ export default function DocSafePage() {
             </div>
           </div>
 
-          {/* Right: uploader */}
+          {/* Right: uploader → sans V1/V2 ni options */}
           <div id="uploader-box">
             <DocSafeUploader />
           </div>
@@ -142,6 +141,5 @@ export default function DocSafePage() {
     </main>
   );
 }
-
 
 
