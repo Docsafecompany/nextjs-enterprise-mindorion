@@ -96,7 +96,11 @@ export default function Page() {
           {/* Carte DocSafe mise en avant */}
           <div className="rounded-2xl border border-slate-200 bg-white p-6 md:p-8 shadow-sm">
             <div className="grid gap-6 md:grid-cols-[280px,1fr,auto] md:items-center">
-              {/* Placeholder visuel */}
+              <Image
+  src="/docsafeexemple.png"
+  alt="DocSafe Example"
+  width={280}
+  height={176} // roughly 16:10; adjust if needed
               <div className="mx-auto h-40 w-full max-w-[280px] rounded-xl bg-gradient-to-br from-slate-100 to-slate-200 ring-1 ring-slate-300/60 md:mx-0 md:h-44" />
 
               <div className="space-y-2">
