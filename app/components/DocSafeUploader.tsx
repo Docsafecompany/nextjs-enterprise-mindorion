@@ -1,180 +1,167 @@
 "use client";
-import * as React from "react";
 
-type Mode = "correct" | "rephrase";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 
-const BACKEND = process.env.NEXT_PUBLIC_BACKEND_URL || ""; // e.g. https://docsafe-backend-beta-1.onrender.com
+/** Client-side mirror of the anonymous free quota */
+const FREE_LIMIT = 3;
+const KEY = "docsafe_free_used";
+
+function getFreeUsed(): number {
+  if (typeof window === "undefined") return 0;
+  const raw = localStorage.getItem(KEY);
+  const n = raw ? parseInt(raw, 10) : 0;
+  return Number.isNaN(n) ? 0 : n;
+}
+function setFreeUsed(n: number) {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(KEY, String(n));
+  document.cookie = `${KEY}=${n}; Path=/; Max-Age=${60 * 60 * 24 * 2}; SameSite=Lax`;
+}
 
 export default function DocSafeUploader() {
-  const [file, setFile] = React.useState<File | null>(null);
-  const [mode, setMode] = React.useState<Mode>("correct");
-  const [lang, setLang] = React.useState<string>("auto"); // pas utilisé par le backend (on le garde pour UI)
-  const [strictPdf, setStrictPdf] = React.useState<boolean>(true); // option backend
-  const [busy, setBusy] = React.useState(false);
-  const [error, setError] = React.useState<string | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [busy, setBusy] = useState(false);
+  const [msg, setMsg] = useState<string | null>(null);
+  const [used, setUsed] = useState<number>(() => getFreeUsed());
+  const [file, setFile] = useState<File | null>(null);
 
-  function onPick(e: React.ChangeEvent<HTMLInputElement>) {
-    const f = e.target.files?.[0];
-    if (f) setFile(f);
-  }
+  const left = Math.max(FREE_LIMIT - used, 0);
 
-  function onDrop(e: React.DragEvent) {
+  /** Open file picker */
+  const openPicker = () => inputRef.current?.click();
+
+  /** Listen to global event from the left CTA */
+  useEffect(() => {
+    const handler = () => openPicker();
+    window.addEventListener("docsafe:open-picker", handler as EventListener);
+    return () => window.removeEventListener("docsafe:open-picker", handler as EventListener);
+  }, []);
+
+  /** DnD helpers */
+  const prevent = (e: React.DragEvent) => {
     e.preventDefault();
-    const f = e.dataTransfer.files?.[0];
-    if (f) setFile(f);
-  }
+    e.stopPropagation();
+  };
+  const onDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
+    prevent(e);
+    const files = e.dataTransfer?.files;
+    if (files && files[0]) {
+      setFile(files[0]);
+      setMsg(`Selected: ${files[0].name}`);
+    }
+  }, []);
 
-  async function handleProcess() {
-    if (!file) return;
-    if (!BACKEND) {
-      setError("Missing NEXT_PUBLIC_BACKEND_URL on the frontend.");
+  /** Process (always V1 under the hood) */
+  async function process(fileToUse: File | null) {
+    if (!fileToUse) {
+      openPicker();
       return;
     }
 
     setBusy(true);
-    setError(null);
+    setMsg("Processing…");
+
     try {
-      // === APPEL DIRECT AU BACKEND RENDER ===
-      const endpoint = `${BACKEND}/${mode === "rephrase" ? "clean-v2" : "clean"}`;
-
       const fd = new FormData();
-      fd.append("file", file);                 // le backend attend "file"
-      fd.append("strictPdf", String(strictPdf)); // "true" | "false" (option PDF)
+      fd.append("file", fileToUse);
+      fd.append("mode", "correct"); // V1 forced
+      fd.append("lang", "auto");
 
-      const res = await fetch(endpoint, { method: "POST", body: fd });
+      const res = await fetch("/api/docsafe", { method: "POST", body: fd });
 
+      if (res.status === 402 || res.status === 429) {
+        setMsg(`Free limit reached (${FREE_LIMIT}). Create an account or see Pricing.`);
+        return;
+      }
       if (!res.ok) {
-        const msg = await res.text().catch(() => "");
-        throw new Error(msg || `HTTP ${res.status}`);
+        const t = await res.text();
+        throw new Error(t || "Processing failed");
       }
 
-      // Réponse = ZIP binaire (docsafe_v1_result.zip / docsafe_v2_result.zip)
-      const blob = await res.blob();
-      const url = URL.createObjectURL(blob);
-
-      // Nom de fichier par défaut si le header est absent
-      const cd = res.headers.get("content-disposition") || "";
-      const match = cd.match(/filename="([^"]+)"/);
-      const fallback = mode === "rephrase" ? "docsafe_v2_result.zip" : "docsafe_v1_result.zip";
-      const filename = match?.[1] || fallback;
-
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = filename;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
+      const next = used + 1;
+      setFreeUsed(next);
+      setUsed(next);
+      setMsg("Processed successfully. (Hook your download here.)");
     } catch (e: any) {
-      setError(e?.message ?? "Unknown error");
+      setMsg(e?.message || "Unexpected error");
     } finally {
       setBusy(false);
     }
   }
 
   return (
-    <div className="mx-auto max-w-2xl space-y-4">
-      {/* Mode + Strict PDF */}
-      <div className="flex flex-wrap items-center gap-3">
-        <label className="font-medium">Mode</label>
-        <div className="flex items-center gap-2">
-          <button
-            type="button"
-            className={`rounded-lg border px-3 py-1 ${
-              mode === "correct" ? "bg-indigo-50 border-indigo-300" : ""
-            }`}
-            onClick={() => setMode("correct")}
-          >
-            V1 – Correct
-          </button>
-          <button
-            type="button"
-            className={`rounded-lg border px-3 py-1 ${
-              mode === "rephrase" ? "bg-indigo-50 border-indigo-300" : ""
-            }`}
-            onClick={() => setMode("rephrase")}
-          >
-            V2 – Rephrase
-          </button>
-        </div>
+    <div className="space-y-3">
+      {/* Hidden native input (double hide to avoid any “Choose file”) */}
+      <input
+        ref={inputRef}
+        type="file"
+        accept=".pdf,.doc,.docx,.ppt,.pptx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.presentationml.presentation"
+        className="hidden"
+        style={{ display: "none" }}
+        onChange={(e) => {
+          const f = e.target.files?.[0] ?? null;
+          setFile(f);
+          setMsg(f ? `Selected: ${f.name}` : null);
+        }}
+      />
 
-        <div className="ml-auto flex items-center gap-3">
-          {/* Lang reste visuel; non utilisé server-side */}
-          <div className="flex items-center gap-2">
-            <label className="text-sm text-slate-600">Language</label>
-            <select
-              value={lang}
-              onChange={(e) => setLang(e.target.value)}
-              className="rounded-md border px-2 py-1 text-sm"
-              title="Processing language (UI only)"
-            >
-              <option value="auto">Auto</option>
-              <option value="en">English</option>
-              <option value="fr">French</option>
-            </select>
-          </div>
-
-          {/* Strict PDF -> envoyé au backend */}
-          <label className="flex items-center gap-2 text-sm text-slate-700">
-            <input
-              type="checkbox"
-              className="h-4 w-4"
-              checked={strictPdf}
-              onChange={(e) => setStrictPdf(e.target.checked)}
-            />
-            Strict PDF
-          </label>
-        </div>
-      </div>
-
-      {/* Zone d’upload */}
+      {/* Drag & drop + our custom “Upload file” button */}
       <div
-        onDragOver={(e) => e.preventDefault()}
+        onDragOver={prevent}
+        onDragEnter={prevent}
         onDrop={onDrop}
-        className="rounded-2xl border-2 border-dashed p-8 text-center"
-        onClick={() => (document.getElementById("docsafe-file") as HTMLInputElement)?.click()}
+        className="rounded-2xl border border-dashed bg-gray-50 p-6 text-center"
       >
-        <p className="mb-3 font-medium">Drop a PDF, DOCX, or PPTX here</p>
-        <p className="mb-4 text-sm text-slate-500">or</p>
-        <input id="docsafe-file" type="file" accept=".pdf,.doc,.docx,.ppt,.pptx" onChange={onPick} className="hidden" />
+        <p className="text-sm font-medium text-gray-700">Drop a PDF, DOCX, or PPTX here</p>
+        <p className="mt-1 text-xs text-gray-500">or</p>
+
         <button
           type="button"
-          className="rounded-lg border px-3 py-1 text-sm hover:bg-slate-50"
-          onClick={(e) => {
-            e.stopPropagation();
-            (document.getElementById("docsafe-file") as HTMLInputElement)?.click();
-          }}
+          onClick={openPicker}
+          disabled={busy}
+          className="mt-2 rounded-xl bg-black px-4 py-2.5 text-sm font-semibold text-white hover:bg-gray-800 disabled:opacity-60"
         >
-          Choose file
+          {busy ? "Uploading…" : "Upload file"}
         </button>
+
         {file && (
-          <p className="mt-3 text-sm text-slate-600">
-            Selected: <span className="font-medium">{file.name}</span>
-          </p>
+          <div className="mt-2 text-xs text-gray-700">
+            Selected file: <span className="font-semibold">{file.name}</span>
+          </div>
         )}
       </div>
 
-      {/* Actions */}
-      <div className="flex items-center gap-3">
+      {/* Process button */}
+      <div className="flex items-center justify-start">
         <button
           type="button"
-          disabled={!file || busy}
-          onClick={handleProcess}
-          className="rounded-xl bg-indigo-600 px-4 py-2 font-semibold text-white hover:bg-indigo-700 disabled:opacity-60"
+          onClick={() => process(file)}
+          disabled={busy}
+          className="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-60"
         >
-          {busy ? "Processing…" : "Process & Download"}
+          Process & Download
         </button>
-        {error && <span className="text-sm text-red-600">{error}</span>}
       </div>
 
-      <p className="text-xs text-slate-500">
-        Your document is processed on the server; layout is preserved. We don’t store files after the job completes.
-      </p>
+      {/* Quota + feedback */}
+      <div className="text-xs text-gray-500">
+        Free beta limit: {FREE_LIMIT} files (anonymous). Used: {Math.min(used, FREE_LIMIT)}/{FREE_LIMIT}
+      </div>
 
-      <p className="text-[10px] text-slate-400">
-        Backend: <span className={BACKEND ? "text-emerald-600" : "text-red-600"}>{BACKEND || "NEXT_PUBLIC_BACKEND_URL not set"}</span>
-      </p>
+      {msg && (
+        <div className="rounded-lg bg-gray-50 px-3 py-2 text-xs text-gray-700">
+          {msg}{" "}
+          <a href="/pricing" className="font-semibold text-indigo-600 hover:text-indigo-500">
+            Pricing
+          </a>{" "}
+          •{" "}
+          <a href="/sign-up" className="font-semibold text-indigo-600 hover:text-indigo-500">
+            Create account
+          </a>
+        </div>
+      )}
     </div>
   );
 }
+
 

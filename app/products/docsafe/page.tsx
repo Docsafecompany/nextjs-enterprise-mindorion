@@ -1,9 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import DocSafeUploader from "../../components/DocSafeUploader";
+import DocSafeUploader from "@/components/DocSafeUploader";
 
-/* petit helper visuel */
+/* helper */
 function Card({ title, children }: { title: string; children: React.ReactNode }) {
   return (
     <div className="rounded-2xl border px-4 py-5 md:px-5">
@@ -14,6 +14,15 @@ function Card({ title, children }: { title: string; children: React.ReactNode })
 }
 
 export default function DocSafePage() {
+  /** Ouvre l’uploader de droite et scroll jusqu’à lui */
+  const openUploader = (e: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => {
+    e.preventDefault();
+    const el = document.getElementById("uploader-box");
+    el?.scrollIntoView({ behavior: "smooth", block: "center" });
+    // petit délai pour laisser scroller avant d’ouvrir le picker
+    setTimeout(() => window.dispatchEvent(new Event("docsafe:open-picker")), 300);
+  };
+
   return (
     <main className="mx-auto max-w-6xl px-4 py-10 md:py-14">
       {/* HERO */}
@@ -46,7 +55,7 @@ export default function DocSafePage() {
       {/* TRY IT NOW */}
       <section id="try" className="mt-8 rounded-2xl border bg-white p-5 shadow-sm md:p-6">
         <div className="grid gap-6 md:grid-cols-2">
-          {/* Left: bullets */}
+          {/* Left: bullets + CTA that opens the picker on the right */}
           <div>
             <h2 className="text-lg font-semibold text-slate-900">Try it now</h2>
             <p className="mt-2 text-sm text-slate-600">
@@ -64,6 +73,7 @@ export default function DocSafePage() {
             <div className="mt-4">
               <a
                 href="#uploader-box"
+                onClick={openUploader}
                 className="inline-flex items-center rounded-xl bg-black px-4 py-2.5 text-sm font-semibold text-white hover:bg-gray-800"
               >
                 Upload file
@@ -72,7 +82,7 @@ export default function DocSafePage() {
             </div>
           </div>
 
-          {/* Right: uploader (sans V1/V2/Language/Strict PDF) */}
+          {/* Right: uploader (no V1/V2 etc.) */}
           <div id="uploader-box">
             <DocSafeUploader />
           </div>
@@ -120,10 +130,11 @@ export default function DocSafePage() {
           </li>
         </ol>
 
-        {/* CTAs centrés */}
+        {/* centered CTAs */}
         <div className="mt-6 flex flex-wrap items-center justify-center gap-3">
           <a
             href="#try"
+            onClick={openUploader}
             className="rounded-xl bg-black px-5 py-2.5 text-sm font-semibold text-white hover:bg-gray-800"
           >
             Try DocSafe Now
@@ -139,5 +150,4 @@ export default function DocSafePage() {
     </main>
   );
 }
-
 
