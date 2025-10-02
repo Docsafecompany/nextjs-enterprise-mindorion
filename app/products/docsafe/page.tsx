@@ -1,10 +1,11 @@
 // app/products/docsafe/page.tsx
 "use client";
 
-import Link from "next/link";
+import { useState } from "react";
 import DocSafeUploader from "../../components/DocSafeUploader";
+import Link from "next/link";
 
-/* ---- Small UI helpers ---- */
+/* Helpers UI très simples */
 function Step({ icon, title, desc }: { icon: string; title: string; desc: string }) {
   return (
     <div className="text-center">
@@ -14,16 +15,7 @@ function Step({ icon, title, desc }: { icon: string; title: string; desc: string
     </div>
   );
 }
-
-function Benefit({
-  icon,
-  title,
-  children,
-}: {
-  icon: string;
-  title: string;
-  children: React.ReactNode;
-}) {
+function Benefit({ icon, title, children }: { icon: string; title: string; children: React.ReactNode }) {
   return (
     <div className="rounded-2xl border border-slate-200 p-5">
       <div className="flex items-center gap-2 text-slate-900">
@@ -34,7 +26,6 @@ function Benefit({
     </div>
   );
 }
-
 function ReviewCard({ title, subtitle }: { title: string; subtitle: string }) {
   return (
     <div className="rounded-2xl border border-slate-200 px-4 py-4 md:px-5">
@@ -43,7 +34,6 @@ function ReviewCard({ title, subtitle }: { title: string; subtitle: string }) {
     </div>
   );
 }
-
 function FAQItem({ q, a }: { q: string; a: React.ReactNode }) {
   return (
     <details className="group rounded-xl border border-slate-200 bg-white">
@@ -56,21 +46,14 @@ function FAQItem({ q, a }: { q: string; a: React.ReactNode }) {
   );
 }
 
-/* ---- Page ---- */
 export default function DocSafePage() {
-  // Ouvre le file picker du composant (monté mais invisible)
-  const openPicker = (
-    e: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>
-  ) => {
-    e.preventDefault();
-    // pas besoin de scroller vers une dropzone : on déclenche juste l’input
-    window.dispatchEvent(new Event("docsafe:open-picker"));
-  };
+  const FREE_LIMIT = 3;
+  const [used, setUsed] = useState(0);
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-10 md:py-14">
-      {/* HERO */}
-      <header className="text-center">
+      {/* HEADER */}
+      <div className="text-center">
         <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl">
           Upload your document
         </h1>
@@ -78,52 +61,36 @@ export default function DocSafePage() {
           Make your files error-free, secure, and professional in seconds — without changing the original layout.
         </p>
 
-        <div className="mt-6 flex items-center justify-center">
-          <a
-            href="#"
-            onClick={openPicker}
-            className="rounded-xl bg-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"
-          >
-            Upload file
-          </a>
+        {/* Bloc compact : Choose file + Process & Download + Selected */}
+        <div className="mt-6 flex justify-center">
+          <DocSafeUploader
+            compact
+            showQuotaLine={false}
+            freeLimit={FREE_LIMIT}
+            onUsageUpdate={(n) => setUsed(n)}
+          />
         </div>
-        <p className="mt-2 text-xs text-gray-500">No sign-up required · Free to use (beta)</p>
-      </header>
 
-      {/* HOW IT WORKS  (colonne gauche uniquement) */}
-      <section className="mt-8 rounded-2xl border bg-white p-6 shadow-sm">
-        <div className="grid gap-8 md:grid-cols-1">
-          <div>
-            <div className="grid grid-cols-3 gap-4">
-              <Step icon="↑" title="1. Upload" desc="Select or drag & drop (PDF, DOCX, PPTX)" />
-              <Step icon="✦" title="2. AI clean" desc="Remove hidden data & fix mistakes" />
-              <Step icon="↓" title="3. Download" desc="Ready-to-share, layout preserved" />
-            </div>
+        {/* Ligne globale sous le header */}
+        <p className="mt-2 text-sm text-gray-500">
+          No sign-up required · Free to use (beta) : {FREE_LIMIT} files. Used {Math.min(used, FREE_LIMIT)}/{FREE_LIMIT}
+        </p>
+      </div>
 
-            <ul className="mt-6 space-y-2 text-sm text-slate-700">
-              <li>• Protect privacy by removing metadata & comments</li>
-              <li>• Correct spelling, grammar and punctuation</li>
-              <li>• Keep tables, slides, images and styles untouched</li>
-              <li>• Batch multiple files and export as a ZIP</li>
-            </ul>
-
-            <div className="mt-4">
-              <a
-                href="#"
-                onClick={openPicker}
-                className="inline-flex items-center rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500"
-              >
-                Upload file
-              </a>
-              <p className="mt-2 text-xs text-gray-500">We don’t store files after processing.</p>
-            </div>
-          </div>
-
-          {/* Compact uploader visible (no big dropzone) */}
-<div className="mt-4">
-  <DocSafeUploader compact />
-</div>
+      {/* STEPS + BULLETS (sans dropzone à droite) */}
+      <section className="mt-12 rounded-2xl border bg-white p-6 shadow-sm">
+        <div className="grid grid-cols-3 gap-4 text-center">
+          <Step icon="↑" title="1. Upload" desc="Select or drag & drop (PDF, DOCX, PPTX)" />
+          <Step icon="✦" title="2. AI clean" desc="Remove hidden data & fix mistakes" />
+          <Step icon="↓" title="3. Download" desc="Ready-to-share, layout preserved" />
         </div>
+
+        <ul className="mt-6 space-y-2 text-sm text-slate-700">
+          <li>• Protect privacy by removing metadata & comments</li>
+          <li>• Correct spelling, grammar and punctuation</li>
+          <li>• Keep tables, slides, images and styles untouched</li>
+          <li>• Batch multiple files and export as a ZIP</li>
+        </ul>
       </section>
 
       {/* WHY USE DOCSAFE */}
@@ -175,8 +142,8 @@ export default function DocSafePage() {
         </div>
       </section>
 
-      {/* Footer CTAs uniquement (pas de grande section violette) */}
-      <section className="mt-8 flex items-center justify-center gap-3">
+      {/* CTAs Footer (compte / pricing) */}
+      <section className="mt-10 flex items-center justify-center gap-3">
         <Link href="/sign-up" className="rounded-xl border px-5 py-2.5 text-sm font-semibold hover:bg-gray-50">
           Create account
         </Link>
@@ -187,5 +154,3 @@ export default function DocSafePage() {
     </main>
   );
 }
-
-
