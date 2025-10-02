@@ -1,7 +1,6 @@
 // app/api/docsafe/route.ts
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
-export const maxDuration = 60;
 
 function extFromName(name: string) {
   const i = name.lastIndexOf(".");
@@ -10,81 +9,73 @@ function extFromName(name: string) {
 
 export async function POST(req: Request) {
   try {
+    // Accept browser FormData
     const form = await req.formData();
-
-    const file = form.get("file") as File | null;
-    const rawMode = String(form.get("mode") ?? "correct").toLowerCase(); // "correct" | "rephrase"
+    const mode = String(form.get("mode") ?? "correct").toLowerCase(); // "correct" | "rephrase"
     const lang = String(form.get("lang") ?? "auto");
-    const strictPdf = String(form.get("strictPdf") ?? "false"); // "true" | "false"
+    const strictPdf = String(form.get("strictPdf") ?? "false");
 
-    if (!file) {
-      return Response.json({ error: "Missing file" }, { status: 400 });
-    }
-
-    // === Upstream config
-    const base = process.env.DOCSAFE_API_URL?.replace(/\/+$/, "");
-    if (!base) {
-      return Response.json(
-        { error: "DOCSAFE_API_URL is not set" },
-        { status: 500 }
-      );
-    }
-
-    // Mappe le "mode" client vers tes vraies routes backend
-    //   - correct  -> /clean
-    //   - rephrase -> /clean-v2
-    const upstreamPath = rawMode === "rephrase" ? "/clean-v2" : "/clean";
-    const url = `${base}${upstreamPath}`;
-
-    // Construit le FormData pour l’amont
+    // Build forwarding FormData
     const upstreamForm = new FormData();
-    upstreamForm.set("file", file, file.name);
-    upstreamForm.set("strictPdf", strictPdf); // utilisé par tes routes /clean /clean-v2
-    // (tu n’utilises pas "lang" côté backend, on peut l’ignorer ou le conserver)
-    upstreamForm.set("lang", lang);
+    // Copy file fields: some clients use "file", some "files[]"
+    for (const entry of form.entries()) {
+      const [k, v] = entry as [string, any];
+      if (v instanceof File) {
+        upstreamForm.append("file", v, v.name);
+      } else if (typeof v === "string") {
+        // preserve fields
+        upstreamForm.append(k, v);
+      }
+    }
 
+    // Decide endpoint on your Render backend
+    const backendBase = process.env.DOCSAFE_BACKEND || process.env.DOCSAFE_API_URL;
+    if (!backendBase) {
+      return new Response(JSON.stringify({ error: "DOCSAFE_BACKEND not configured" }), {
+        status: 500,
+        headers: { "content-type": "application/json" },
+      });
+    }
+
+    // Choose the route
+    const endpoint = mode === "rephrase" || mode === "v2" ? "/clean-v2" : "/clean";
+    const upstreamUrl = new URL(endpoint, backendBase).toString();
+
+    // Forward request
     const headers: Record<string, string> = {};
     if (process.env.DOCSAFE_API_KEY) {
-      headers["x-api-key"] = process.env.DOCSAFE_API_KEY;
+      headers["x-api-key"] = String(process.env.DOCSAFE_API_KEY);
     }
 
-    const upstream = await fetch(url, {
+    const upstream = await fetch(upstreamUrl, {
       method: "POST",
       headers,
-      body: upstreamForm,
+      body: upstreamForm as unknown as BodyInit,
     });
 
+    // If upstream returned error text/json, forward it with same status
     if (!upstream.ok) {
-      const text = await upstream.text().catch(() => "");
-      return Response.json(
-        {
-          error: text || `Upstream error ${upstream.status}`,
-          upstream: url,
-          status: upstream.status,
-        },
-        { status: 502 }
-      );
+      const ct = upstream.headers.get("content-type") ?? "text/plain";
+      const bodyText = await upstream.text().catch(() => "");
+      return new Response(bodyText || `Upstream error ${upstream.status}`, {
+        status: upstream.status,
+        headers: { "content-type": ct },
+      });
     }
 
-    // Tes routes renvoient un ZIP ou un binaire -> on stream tel quel
-    const ct =
-      upstream.headers.get("content-type") ?? "application/octet-stream";
-    const cd =
-      upstream.headers.get("content-disposition") ??
-      `attachment; filename="docsafe_result.${extFromName(file.name)}"`;
+    // Stream the upstream response back preserving important headers
+    const resHeaders: Record<string, string> = {};
+    const ct = upstream.headers.get("content-type");
+    const cd = upstream.headers.get("content-disposition");
+    if (ct) resHeaders["content-type"] = ct;
+    if (cd) resHeaders["content-disposition"] = cd;
 
-    return new Response(upstream.body, {
-      headers: {
-        "content-type": ct,
-        "content-disposition": cd,
-        "x-upstream-url": url,
-      },
-    });
+    return new Response(upstream.body, { status: 200, headers: resHeaders });
   } catch (err: any) {
-    return Response.json(
-      { error: err?.message ?? "Proxy failed" },
-      { status: 500 }
-    );
+    return new Response(JSON.stringify({ error: String(err?.message || err) }), {
+      status: 500,
+      headers: { "content-type": "application/json" },
+    });
   }
 }
 
