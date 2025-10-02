@@ -4,23 +4,38 @@
 import Link from "next/link";
 import DocSafeUploader from "../../components/DocSafeUploader";
 
-/* ---------- Small UI helpers ---------- */
-function BenefitCard({ title, children }: { title: string; children: React.ReactNode }) {
+/* ---- Small UI helpers ---- */
+function Step({ icon, title, desc }: { icon: string; title: string; desc: string }) {
   return (
-    <div className="rounded-2xl border border-slate-200 px-4 py-5 md:px-5">
-      <h3 className="text-base font-semibold text-slate-900">{title}</h3>
-      <div className="mt-2 text-sm text-slate-600">{children}</div>
+    <div className="text-center">
+      <div className="mx-auto grid h-12 w-12 place-items-center rounded-full border text-lg">{icon}</div>
+      <div className="mt-2 text-sm font-semibold text-slate-900">{title}</div>
+      <div className="mt-1 text-xs text-slate-500">{desc}</div>
     </div>
   );
 }
 
-function ReviewCard({
+function Benefit({
+  icon,
   title,
-  subtitle,
+  children,
 }: {
+  icon: string;
   title: string;
-  subtitle: string;
+  children: React.ReactNode;
 }) {
+  return (
+    <div className="rounded-2xl border border-slate-200 p-5">
+      <div className="flex items-center gap-2 text-slate-900">
+        <span className="grid h-6 w-6 place-items-center rounded-md bg-indigo-50 text-sm">{icon}</span>
+        <h3 className="font-semibold">{title}</h3>
+      </div>
+      <p className="mt-2 text-sm text-slate-600">{children}</p>
+    </div>
+  );
+}
+
+function ReviewCard({ title, subtitle }: { title: string; subtitle: string }) {
   return (
     <div className="rounded-2xl border border-slate-200 px-4 py-4 md:px-5">
       <div className="font-semibold text-slate-900">{title}</div>
@@ -41,12 +56,14 @@ function FAQItem({ q, a }: { q: string; a: React.ReactNode }) {
   );
 }
 
-/* ---------- Page ---------- */
+/* ---- Page ---- */
 export default function DocSafePage() {
-  const openUploader = (e: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => {
+  const openPicker = (
+    e: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>
+  ) => {
     e.preventDefault();
-    const el = document.getElementById("uploader-box");
-    el?.scrollIntoView({ behavior: "smooth", block: "center" });
+    const box = document.getElementById("uploader-box");
+    box?.scrollIntoView({ behavior: "smooth", block: "center" });
     setTimeout(() => window.dispatchEvent(new Event("docsafe:open-picker")), 250);
   };
 
@@ -58,13 +75,13 @@ export default function DocSafePage() {
           Upload your document
         </h1>
         <p className="mx-auto mt-3 max-w-3xl text-slate-600">
-          Make your files error-free and secure in seconds — without changing the original layout.
+          Make your files error-free, secure, and professional in seconds — without changing the original layout.
         </p>
 
         <div className="mt-6 flex items-center justify-center">
           <a
             href="#uploader-box"
-            onClick={openUploader}
+            onClick={openPicker}
             className="rounded-xl bg-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"
           >
             Upload file
@@ -73,46 +90,28 @@ export default function DocSafePage() {
         <p className="mt-2 text-xs text-gray-500">No sign-up required · Free to use (beta)</p>
       </header>
 
-      {/* 3 STEPS + DROPPER */}
-      <section id="try" className="mt-8 rounded-2xl border bg-white p-5 shadow-sm md:p-6">
-        <div className="grid gap-6 md:grid-cols-2">
-          {/* Left: steps + bullets */}
+      {/* HOW IT WORKS + UPLOADER */}
+      <section className="mt-8 rounded-2xl border bg-white p-6 shadow-sm">
+        <div className="grid gap-8 md:grid-cols-[1fr,1fr] md:items-start">
+          {/* Left: 3 steps only (simple) */}
           <div>
-            <div className="grid grid-cols-3 gap-4 text-center">
-              <div>
-                <div className="mx-auto mb-2 grid h-12 w-12 place-items-center rounded-full border">
-                  ↑
-                </div>
-                <div className="text-sm font-semibold text-slate-900">1. Upload</div>
-                <div className="mt-1 text-xs text-slate-500">PDF, DOCX, or PPTX</div>
-              </div>
-              <div>
-                <div className="mx-auto mb-2 grid h-12 w-12 place-items-center rounded-full border">
-                  ✦
-                </div>
-                <div className="text-sm font-semibold text-slate-900">2. AI clean</div>
-                <div className="mt-1 text-xs text-slate-500">Remove metadata & mistakes</div>
-              </div>
-              <div>
-                <div className="mx-auto mb-2 grid h-12 w-12 place-items-center rounded-full border">
-                  ↓
-                </div>
-                <div className="text-sm font-semibold text-slate-900">3. Download</div>
-                <div className="mt-1 text-xs text-slate-500">Ready-to-share file</div>
-              </div>
+            <div className="grid grid-cols-3 gap-4">
+              <Step icon="↑" title="1. Upload" desc="Select or drag & drop (PDF, DOCX, PPTX)" />
+              <Step icon="✦" title="2. AI clean" desc="Remove hidden data & fix mistakes" />
+              <Step icon="↓" title="3. Download" desc="Ready-to-share, layout preserved" />
             </div>
 
-            <ul className="mt-5 space-y-2 text-sm text-slate-700">
-              <li>• Remove hidden metadata & comments</li>
-              <li>• Correct spelling & grammar</li>
-              <li>• Preserve formatting & structure</li>
-              <li>• Export multiple files in a ZIP</li>
+            <ul className="mt-6 space-y-2 text-sm text-slate-700">
+              <li>• Protect privacy by removing metadata & comments</li>
+              <li>• Correct spelling, grammar and punctuation</li>
+              <li>• Keep tables, slides, images and styles untouched</li>
+              <li>• Batch multiple files and export as a ZIP</li>
             </ul>
 
             <div className="mt-4">
               <a
                 href="#uploader-box"
-                onClick={openUploader}
+                onClick={openPicker}
                 className="inline-flex items-center rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500"
               >
                 Upload file
@@ -121,7 +120,7 @@ export default function DocSafePage() {
             </div>
           </div>
 
-          {/* Right: uploader */}
+          {/* Right: uploader box */}
           <div id="uploader-box">
             <DocSafeUploader />
           </div>
@@ -129,79 +128,81 @@ export default function DocSafePage() {
       </section>
 
       {/* WHY USE DOCSAFE */}
-      <section className="mt-10">
+      <section className="mt-12">
         <h2 className="text-center text-2xl font-bold">Why use DocSafe?</h2>
-        <div className="mt-5 grid gap-4 md:grid-cols-2">
-          <BenefitCard title="Professional result">
-            Deliver documents that are free of errors and refined in style.
-          </BenefitCard>
-          <BenefitCard title="Time-saving">
-            Let AI handle corrections in a fraction of the time.
-          </BenefitCard>
-          <BenefitCard title="Your data is safe">
-            Files are processed securely and deleted after processing.
-          </BenefitCard>
-          <BenefitCard title="Layout preserved">
-            Keep your tables, slides, images and styles untouched.
-          </BenefitCard>
+        <div className="mt-6 grid gap-4 md:grid-cols-2">
+          <Benefit icon="🛡️" title="Privacy & Security">
+            Files are processed securely and deleted after processing. We never use your data to train models.
+          </Benefit>
+          <Benefit icon="✍️" title="Professional result">
+            Deliver polished documents that inspire trust with clear, correct writing.
+          </Benefit>
+          <Benefit icon="⚡" title="Save time">
+            Let AI handle corrections in seconds instead of manual edits.
+          </Benefit>
+          <Benefit icon="🎨" title="Layout preserved">
+            Your design stays intact — tables, slides, images and styles remain unchanged.
+          </Benefit>
         </div>
       </section>
 
-      {/* REVIEWS & FAQ (added right after “Why use DocSafe?”) */}
-      <section className="mt-10">
-        {/* Reviews row */}
+      {/* REVIEWS & FAQ */}
+      <section className="mt-12">
         <div className="grid gap-4 md:grid-cols-3">
           <ReviewCard title="DocSafe Reviews" subtitle="44 reviews • ★★★★☆" />
           <ReviewCard title="Capterra" subtitle="23 ratings • ★★★★☆" />
           <ReviewCard title="Workspace Marketplace" subtitle="10,000,000+ users • ★★★★☆" />
         </div>
 
-        {/* FAQ */}
         <h3 className="mt-6 mb-3 text-xl font-bold text-slate-900">Frequently asked questions</h3>
         <div className="space-y-3">
           <FAQItem
-            q="Will my original formatting be preserved?"
-            a="Yes. Your layout, images, tables and slides remain the same. We only update the text content."
+            q="Is my data deleted after upload?"
+            a="Yes. Files are processed on our servers and deleted after the operation completes."
+          />
+          <FAQItem
+            q="Will DocSafe change my design?"
+            a="No. We preserve your layout, slides, images, and styles. Only the text content is updated."
+          />
+          <FAQItem
+            q="Can I process multiple files at once?"
+            a="Yes. Upload multiple documents and download a single ZIP containing all the results."
           />
           <FAQItem
             q="Which formats are supported?"
-            a="PDF, DOCX and PPTX. You can export back to the same format or download a ZIP for multiple files."
+            a="PDF, DOCX and PPTX."
           />
           <FAQItem
-            q="Do you store my files?"
-            a="No. Files are processed server-side and deleted after the operation completes."
-          />
-          <FAQItem
-            q="What about metadata?"
-            a="We remove hidden properties like author, comments, revisions and sensitive custom fields before export."
-          />
-          <FAQItem
-            q="How do I start?"
-            a={
-              <>
-                Click{" "}
-                <a href="#uploader-box" className="text-indigo-600 underline" onClick={openUploader}>
-                  Upload file
-                </a>{" "}
-                above, drop your document, then click <b>Process &amp; Download</b>.
-              </>
-            }
+            q="Do I need to sign up to try it?"
+            a="No. You can try DocSafe for free without creating an account (beta limits apply)."
           />
         </div>
       </section>
 
-      {/* No bottom Upload button anymore */}
-      <section className="mt-10 flex items-center justify-center gap-3">
-        <Link
-          href="/sign-up"
-          className="rounded-xl border px-5 py-2.5 text-sm font-semibold hover:bg-gray-50"
-        >
+      {/* FINAL CTA SECTION (violet background) */}
+      <section className="mt-12 rounded-2xl bg-indigo-600 px-6 py-8 text-center text-white">
+        <h3 className="text-2xl font-bold">Ready to try DocSafe?</h3>
+        <p className="mx-auto mt-2 max-w-2xl text-indigo-100">
+          Upload your first document now — free and no signup required. Your layout stays intact, just cleaner.
+        </p>
+        <div className="mt-5">
+          <a
+            href="#uploader-box"
+            onClick={openPicker}
+            className="inline-flex items-center rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-indigo-700 hover:bg-indigo-50"
+          >
+            Upload file
+          </a>
+        </div>
+        <p className="mt-2 text-xs text-indigo-100/90">We don’t store files after processing.</p>
+      </section>
+
+      {/* Footer CTAs (account/pricing) */}
+      <section className="mt-8 flex items-center justify-center gap-3">
+        <Link href="/sign-up" className="rounded-xl border px-5 py-2.5 text-sm font-semibold hover:bg-gray-50">
           Create account
         </Link>
-        <Link
-          href="/pricing"
-          className="rounded-xl border px-5 py-2.5 text-sm font-semibold hover:bg-gray-50"
-        >
+        <Link href="/pricing" className="rounded-xl border px-5 py-2.5 text-sm font-semibold hover:bg-gray-50">
           See pricing
         </Link>
       </section>
