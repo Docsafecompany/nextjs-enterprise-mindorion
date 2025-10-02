@@ -2,7 +2,7 @@
 
 import React, { useCallback, useEffect, useRef, useState } from "react";
 
-/** Client-side mirror of the anonymous free quota */
+/** Anonymous free quota (same logic as before) */
 const FREE_LIMIT = 3;
 const KEY = "docsafe_free_used";
 
@@ -18,7 +18,14 @@ function setFreeUsed(n: number) {
   document.cookie = `${KEY}=${n}; Path=/; Max-Age=${60 * 60 * 24 * 2}; SameSite=Lax`;
 }
 
-export default function DocSafeUploader() {
+type Props = {
+  /** When true, renders a minimal UI: just file name + Process button (no big dropzone). */
+  compact?: boolean;
+  /** Optional: auto-process immediately after picking a file (compact mode only). */
+  autoProcessOnPick?: boolean;
+};
+
+export default function DocSafeUploader({ compact = false, autoProcessOnPick = false }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
   const [msg, setMsg] = useState<string | null>(null);
@@ -27,24 +34,22 @@ export default function DocSafeUploader() {
 
   const left = Math.max(FREE_LIMIT - used, 0);
 
-  /** Open file picker */
   const openPicker = () => inputRef.current?.click();
 
-  /** Listen to global event that triggers the picker */
+  // Allow outside buttons to open the picker
   useEffect(() => {
     const handler = () => openPicker();
-    // TS-safe add/remove
     window.addEventListener("docsafe:open-picker", handler as unknown as EventListener);
     return () => {
       window.removeEventListener("docsafe:open-picker", handler as unknown as EventListener);
     };
   }, []);
 
-  /** DnD helpers */
   const prevent = (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
   };
+
   const onDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     prevent(e);
     const files = e.dataTransfer?.files;
@@ -54,7 +59,6 @@ export default function DocSafeUploader() {
     }
   }, []);
 
-  /** Process (always V1 under the hood) */
   async function process(fileToUse: File | null) {
     if (!fileToUse) {
       openPicker();
@@ -81,10 +85,13 @@ export default function DocSafeUploader() {
         throw new Error(t || "Processing failed");
       }
 
+      // If upstream returns a downloadable stream, browser will trigger download automatically by navigation.
+      // If you return JSON/jobId instead, adapt here accordingly.
+
       const next = used + 1;
       setFreeUsed(next);
       setUsed(next);
-      setMsg("Processed successfully. (Hook your download here.)");
+      setMsg("Processed successfully.");
     } catch (e: any) {
       setMsg(e?.message || "Unexpected error");
     } finally {
@@ -92,80 +99,121 @@ export default function DocSafeUploader() {
     }
   }
 
+  const handlePicked = (f: File | null) => {
+    setFile(f);
+    setMsg(f ? `Selected: ${f.name}` : null);
+    if (f && compact && autoProcessOnPick) {
+      // Fire after a small tick so UI updates first
+      setTimeout(() => process(f), 50);
+    }
+  };
+
   return (
-    <div className="space-y-3">
-      {/* Hidden native input (double hide to avoid any “Choose file”) */}
+    <div className={compact ? "space-y-3" : "space-y-3"}>
+      {/* Hidden input (shared) */}
       <input
         ref={inputRef}
         type="file"
         accept=".pdf,.doc,.docx,.ppt,.pptx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.presentationml.presentation"
         className="hidden"
-        style={{ display: "none" }}
-        onChange={(e) => {
-          const f = e.target.files?.[0] ?? null;
-          setFile(f);
-          setMsg(f ? `Selected: ${f.name}` : null);
-        }}
+        onChange={(e) => handlePicked(e.target.files?.[0] ?? null)}
       />
 
-      {/* Drag & drop + our custom “Upload file” button */}
-      <div
-        onDragOver={prevent}
-        onDragEnter={prevent}
-        onDrop={onDrop}
-        className="rounded-2xl border border-dashed bg-gray-50 p-6 text-center"
-      >
-        <p className="text-sm font-medium text-gray-700">Drop a PDF, DOCX, or PPTX here</p>
-        <p className="mt-1 text-xs text-gray-500">or</p>
+      {compact ? (
+        /* --- COMPACT UI: no dropzone, just actions and feedback --- */
+        <div className="rounded-xl border border-slate-200 bg-white p-4">
+          <div className="flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              onClick={openPicker}
+              disabled={busy}
+              className="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-60"
+            >
+              {busy ? "Uploading…" : "Choose file"}
+            </button>
+            <button
+              type="button"
+              onClick={() => process(file)}
+              disabled={busy || !file}
+              className="rounded-xl border px-4 py-2.5 text-sm font-semibold hover:bg-gray-50 disabled:opacity-60"
+            >
+              Process & Download
+            </button>
 
-        <button
-          type="button"
-          onClick={openPicker}
-          disabled={busy}
-          className="mt-2 rounded-xl bg-black px-4 py-2.5 text-sm font-semibold text-white hover:bg-gray-800 disabled:opacity-60"
-        >
-          {busy ? "Uploading…" : "Upload file"}
-        </button>
-
-        {file && (
-          <div className="mt-2 text-xs text-gray-700">
-            Selected file: <span className="font-semibold">{file.name}</span>
+            {file && (
+              <span className="text-xs text-slate-600 truncate">Selected: {file.name}</span>
+            )}
           </div>
-        )}
-      </div>
 
-      {/* Process button */}
-      <div className="flex items-center justify-start">
-        <button
-          type="button"
-          onClick={() => process(file)}
-          disabled={busy}
-          className="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-60"
+          <div className="mt-2 text-xs text-gray-500">
+            Free beta limit: {FREE_LIMIT} files (anonymous). Used:{" "}
+            {Math.min(used, FREE_LIMIT)}/{FREE_LIMIT}
+          </div>
+
+          {msg && (
+            <div className="mt-2 rounded-lg bg-gray-50 px-3 py-2 text-xs text-gray-700">
+              {msg} ·{" "}
+              <a href="/pricing" className="font-semibold text-indigo-600 hover:text-indigo-500">
+                Pricing
+              </a>{" "}
+              •{" "}
+              <a href="/sign-up" className="font-semibold text-indigo-600 hover:text-indigo-500">
+                Create account
+              </a>
+            </div>
+          )}
+        </div>
+      ) : (
+        /* --- FULL UI (kept for future if you re-enable the big dropzone) --- */
+        <div
+          onDragOver={prevent}
+          onDragEnter={prevent}
+          onDrop={onDrop}
+          className="rounded-2xl border border-dashed bg-gray-50 p-6 text-center"
         >
-          Process & Download
-        </button>
-      </div>
+          <p className="text-sm font-medium text-gray-700">Drop a PDF, DOCX, or PPTX here</p>
+          <p className="mt-1 text-xs text-gray-500">or</p>
 
-      {/* Quota + feedback */}
-      <div className="text-xs text-gray-500">
-        Free beta limit: {FREE_LIMIT} files (anonymous). Used: {Math.min(used, FREE_LIMIT)}/{FREE_LIMIT}
-      </div>
+          <button
+            type="button"
+            onClick={openPicker}
+            disabled={busy}
+            className="mt-2 rounded-xl bg-black px-4 py-2.5 text-sm font-semibold text-white hover:bg-gray-800 disabled:opacity-60"
+          >
+            {busy ? "Uploading…" : "Upload file"}
+          </button>
 
-      {msg && (
-        <div className="rounded-lg bg-gray-50 px-3 py-2 text-xs text-gray-700">
-          {msg}{" "}
-          <a href="/pricing" className="font-semibold text-indigo-600 hover:text-indigo-500">
-            Pricing
-          </a>{" "}
-          •{" "}
-          <a href="/sign-up" className="font-semibold text-indigo-600 hover:text-indigo-500">
-            Create account
-          </a>
+          {file && (
+            <div className="mt-2 text-xs text-gray-700">
+              Selected file: <span className="font-semibold">{file.name}</span>
+            </div>
+          )}
+
+          <div className="mt-4">
+            <button
+              type="button"
+              onClick={() => process(file)}
+              disabled={busy}
+              className="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-60"
+            >
+              Process & Download
+            </button>
+          </div>
+
+          <div className="mt-2 text-xs text-gray-500">
+            Free beta limit: {FREE_LIMIT} files (anonymous). Used: {Math.min(used, FREE_LIMIT)}/
+            {FREE_LIMIT}
+          </div>
+
+          {msg && (
+            <div className="mt-2 rounded-lg bg-gray-50 px-3 py-2 text-xs text-gray-700">
+              {msg}
+            </div>
+          )}
         </div>
       )}
     </div>
   );
 }
-
 
 

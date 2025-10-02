@@ -119,10 +119,10 @@ export default function DocSafePage() {
             </div>
           </div>
 
-          {/* Uploader monté mais invisible (permet d'ouvrir le picker sans afficher la dropzone) */}
-          <div className="sr-only" aria-hidden>
-            <DocSafeUploader />
-          </div>
+          {/* Compact uploader visible (no big dropzone) */}
+<div className="mt-4">
+  <DocSafeUploader compact />
+</div>
         </div>
       </section>
 
