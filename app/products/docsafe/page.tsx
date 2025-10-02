@@ -58,13 +58,13 @@ function FAQItem({ q, a }: { q: string; a: React.ReactNode }) {
 
 /* ---- Page ---- */
 export default function DocSafePage() {
+  // Ouvre le file picker du composant (monté mais invisible)
   const openPicker = (
     e: React.MouseEvent<HTMLAnchorElement | HTMLButtonElement>
   ) => {
     e.preventDefault();
-    const box = document.getElementById("uploader-box");
-    box?.scrollIntoView({ behavior: "smooth", block: "center" });
-    setTimeout(() => window.dispatchEvent(new Event("docsafe:open-picker")), 250);
+    // pas besoin de scroller vers une dropzone : on déclenche juste l’input
+    window.dispatchEvent(new Event("docsafe:open-picker"));
   };
 
   return (
@@ -80,7 +80,7 @@ export default function DocSafePage() {
 
         <div className="mt-6 flex items-center justify-center">
           <a
-            href="#uploader-box"
+            href="#"
             onClick={openPicker}
             className="rounded-xl bg-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500"
           >
@@ -90,10 +90,9 @@ export default function DocSafePage() {
         <p className="mt-2 text-xs text-gray-500">No sign-up required · Free to use (beta)</p>
       </header>
 
-      {/* HOW IT WORKS + UPLOADER */}
+      {/* HOW IT WORKS  (colonne gauche uniquement) */}
       <section className="mt-8 rounded-2xl border bg-white p-6 shadow-sm">
-        <div className="grid gap-8 md:grid-cols-[1fr,1fr] md:items-start">
-          {/* Left: 3 steps only (simple) */}
+        <div className="grid gap-8 md:grid-cols-1">
           <div>
             <div className="grid grid-cols-3 gap-4">
               <Step icon="↑" title="1. Upload" desc="Select or drag & drop (PDF, DOCX, PPTX)" />
@@ -110,7 +109,7 @@ export default function DocSafePage() {
 
             <div className="mt-4">
               <a
-                href="#uploader-box"
+                href="#"
                 onClick={openPicker}
                 className="inline-flex items-center rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500"
               >
@@ -120,8 +119,8 @@ export default function DocSafePage() {
             </div>
           </div>
 
-          {/* Right: uploader box */}
-          <div id="uploader-box">
+          {/* Uploader monté mais invisible (permet d'ouvrir le picker sans afficher la dropzone) */}
+          <div className="sr-only" aria-hidden>
             <DocSafeUploader />
           </div>
         </div>
@@ -168,10 +167,7 @@ export default function DocSafePage() {
             q="Can I process multiple files at once?"
             a="Yes. Upload multiple documents and download a single ZIP containing all the results."
           />
-          <FAQItem
-            q="Which formats are supported?"
-            a="PDF, DOCX and PPTX."
-          />
+          <FAQItem q="Which formats are supported?" a="PDF, DOCX and PPTX." />
           <FAQItem
             q="Do I need to sign up to try it?"
             a="No. You can try DocSafe for free without creating an account (beta limits apply)."
@@ -179,25 +175,7 @@ export default function DocSafePage() {
         </div>
       </section>
 
-      {/* FINAL CTA SECTION (violet background) */}
-      <section className="mt-12 rounded-2xl bg-indigo-600 px-6 py-8 text-center text-white">
-        <h3 className="text-2xl font-bold">Ready to try DocSafe?</h3>
-        <p className="mx-auto mt-2 max-w-2xl text-indigo-100">
-          Upload your first document now — free and no signup required. Your layout stays intact, just cleaner.
-        </p>
-        <div className="mt-5">
-          <a
-            href="#uploader-box"
-            onClick={openPicker}
-            className="inline-flex items-center rounded-xl bg-white px-5 py-2.5 text-sm font-semibold text-indigo-700 hover:bg-indigo-50"
-          >
-            Upload file
-          </a>
-        </div>
-        <p className="mt-2 text-xs text-indigo-100/90">We don’t store files after processing.</p>
-      </section>
-
-      {/* Footer CTAs (account/pricing) */}
+      {/* Footer CTAs uniquement (pas de grande section violette) */}
       <section className="mt-8 flex items-center justify-center gap-3">
         <Link href="/sign-up" className="rounded-xl border px-5 py-2.5 text-sm font-semibold hover:bg-gray-50">
           Create account
@@ -209,4 +187,5 @@ export default function DocSafePage() {
     </main>
   );
 }
+
 
