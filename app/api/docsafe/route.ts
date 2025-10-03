@@ -1,101 +1,90 @@
-// app/api/docsafe/route.ts
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
+// mets le plus haut possible (Pro = 60s ; Enterprise peut monter)
 export const maxDuration = 60;
 
-// IMPORTANT: configure dans Vercel -> DOCSAFE_API_URL = https://docsafe-backend-beta-1.onrender.com
-const BACKEND = process.env.DOCSAFE_API_URL;
+const UP = process.env.DOCSAFE_API_URL!; // ex: https://docsafe-backend-beta-1.onrender.com
+const API_KEY = process.env.DOCSAFE_API_KEY || "";
+
+function extOf(name: string) {
+  const i = name.lastIndexOf(".");
+  return i >= 0 ? name.slice(i + 1) : "bin";
+}
+
+// petit “réveil” Render (ne bloque pas si ça échoue)
+async function warmUp() {
+  try { await fetch(`${UP}/health`, { cache: "no-store" }); } catch {}
+}
+
+// retry util
+async function withRetries<T>(fn: () => Promise<T>, tries = 3, backoffMs = 1200): Promise<T> {
+  let lastErr: any;
+  for (let i = 0; i < tries; i++) {
+    try { return await fn(); } 
+    catch (e) { lastErr = e; await new Promise(r => setTimeout(r, backoffMs * (i + 1))); }
+  }
+  throw lastErr;
+}
 
 export async function POST(req: Request) {
-  if (!BACKEND) {
-    return Response.json(
-      { error: "DOCSAFE_API_URL env var is missing on the frontend" },
-      { status: 500 }
-    );
-  }
-
   try {
-    const inForm = await req.formData();
-    const file = inForm.get("file") as File | null;
+    await warmUp();
+
+    const form = await req.formData();
+    const file = form.get("file") as File | null;
+    const lang = String(form.get("lang") ?? "auto");
+    const strictPdf = String(form.get("strictPdf") ?? "false");
+    // on force V2 (clean + rephrase) côté backend ; change vers /clean si tu veux que V1 only
+    const endpoint = `${UP}/clean-v2`;
+
     if (!file) return Response.json({ error: "Missing file" }, { status: 400 });
 
-    // on cible la V2 (clean + rephrase + report)
-    const upstreamUrl = `${BACKEND.replace(/\/+$/, "")}/clean-v2`;
+    // on forward tel quel
+    const upstreamForm = new FormData();
+    upstreamForm.set("file", file, file.name);
+    upstreamForm.set("lang", lang);
+    upstreamForm.set("strictPdf", strictPdf);
 
-    const fd = new FormData();
-    fd.set("file", file, file.name);
-    fd.set("strictPdf", "false");
+    const upstream = await withRetries(() =>
+      fetch(endpoint, {
+        method: "POST",
+        headers: { ...(API_KEY ? { "x-api-key": API_KEY } : {}) },
+        body: upstreamForm,
+        // IMPORTANT: pas de cache / pas d’abort côté Next
+        cache: "no-store",
+      }),
+      3
+    );
 
-    const headers: Record<string, string> = {};
-    if (process.env.DOCSAFE_API_KEY) headers["x-api-key"] = process.env.DOCSAFE_API_KEY!;
-
-    const upstream = await fetch(upstreamUrl, { method: "POST", headers, body: fd });
-
-    // Si status non OK -> renvoyer erreur texte/JSON (surtout pas download)
-    if (!upstream.ok) {
-      const txt = await upstream.text().catch(() => "");
-      try {
-        const j = JSON.parse(txt);
-        return Response.json(j, { status: upstream.status });
-      } catch {
-        return new Response(
-          txt || `Upstream error ${upstream.status} (see backend logs)`,
-          { status: upstream.status, headers: { "content-type": "text/plain; charset=utf-8" } }
-        );
-      }
-    }
-
-    // Vérifier que c'est bien un ZIP/téléchargeable avant de forcer le download
+    // Si Render renvoie une erreur JSON/HTML → propage proprement
     const ct = upstream.headers.get("content-type") || "";
-    const cd = upstream.headers.get("content-disposition") || "";
-
-    const isZipish =
-      /\bapplication\/(zip|octet-stream)\b/i.test(ct) ||
-      /filename\s*=\s*"?[^"]+\.zip"?/i.test(cd);
-
-    if (!isZipish) {
-      // Pas un zip -> renvoyer contenu lisible (JSON/texte)
-      const buf = await upstream.arrayBuffer();
-      const bytes = new Uint8Array(buf);
-
-      // Essayer texte
-      let txt = "";
-      try {
-        txt = new TextDecoder("utf-8", { fatal: false }).decode(bytes);
-      } catch {}
-      if (txt) {
-        try {
-          const j = JSON.parse(txt);
-          return Response.json(j, { status: 502 });
-        } catch {
-          return new Response(txt, {
-            status: 502,
-            headers: { "content-type": "text/plain; charset=utf-8" },
-          });
-        }
-      }
-      // fallback binaire
-      return new Response("Unexpected upstream response (not a ZIP)", {
-        status: 502,
-        headers: { "content-type": "text/plain; charset=utf-8" },
+    if (!upstream.ok || (!ct.startsWith("application/zip") && !ct.startsWith("application/octet-stream"))) {
+      const text = await upstream.text().catch(() => "");
+      return new Response(text || `Upstream error ${upstream.status}`, {
+        status: upstream.status || 502,
+        headers: { "content-type": ct || "text/plain; charset=utf-8" },
       });
     }
 
-    // OK -> streamer le zip tel quel
+    // stream direct vers le browser (déclenche le download)
+    const cd =
+      upstream.headers.get("content-disposition") ||
+      `attachment; filename="docsafe_v2_result.${extOf(file.name) === "pdf" ? "zip" : "zip"}"`;
+
     return new Response(upstream.body, {
-      status: 200,
       headers: {
-        "content-type": ct || "application/zip",
-        "content-disposition":
-          cd || `attachment; filename="docsafe_v2_result.zip"`,
+        "content-type": ct,
+        "content-disposition": cd,
+        // utile pour Chrome
+        "cache-control": "no-store",
       },
     });
   } catch (err: any) {
+    // si ça a quand même timeout côté Vercel, on renvoie un message clair au client
     return Response.json(
-      { error: err?.message ?? "Proxy failed" },
-      { status: 500 }
+      { error: err?.message || "Proxy failed (timeout/Render cold start?)" },
+      { status: 504 }
     );
   }
 }
-
 
