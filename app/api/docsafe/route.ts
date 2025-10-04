@@ -3,20 +3,15 @@ export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 export const maxDuration = 60;
 
-const UP = process.env.DOCSAFE_API_URL!; // ex: https://docsafe-backend-beta-1.onrender.com
-const API_KEY = process.env.DOCSAFE_API_KEY || "";
+const UP = process.env.DOCSAFE_API_URL!;            // ex: https://docsafe-backend-beta-1.onrender.com
+const API_KEY = process.env.DOCSAFE_API_KEY || "";  // optionnel
 
-function ext(name = "") {
-  const i = name.lastIndexOf(".");
-  return i >= 0 ? name.slice(i + 1).toLowerCase() : "";
-}
-
-// “Réveille” Render rapidement (ne bloque pas si ça échoue)
+// Ping non bloquant (réveille Render)
 async function warm() {
   try { await fetch(`${UP}/health`, { cache: "no-store" }); } catch {}
 }
 
-// Retentes avec backoff (pour les cold starts)
+// petit retry (gère cold start)
 async function retry<T>(fn: () => Promise<T>, n = 3, step = 1000): Promise<T> {
   let last: any;
   for (let i = 0; i < n; i++) {
@@ -38,8 +33,8 @@ export async function POST(req: Request) {
 
     if (!file) return Response.json({ error: "Missing file" }, { status: 400 });
 
-    // Choisis V2 (clean + rephrase). Si tu veux V1 seulement => /clean
-    const endpoint = `${UP}/clean-v2`;
+    // 👉 V1 uniquement
+    const endpoint = `${UP}/clean`;
 
     const upstreamForm = new FormData();
     upstreamForm.set("file", file, file.name);
@@ -65,7 +60,6 @@ export async function POST(req: Request) {
       });
     }
 
-    // On refuse les “fausses” réponses (HTML/JSON) ici
     if (!ct.startsWith("application/zip") && !ct.startsWith("application/octet-stream")) {
       const txt = await r.text().catch(() => "");
       return new Response(txt || "Unexpected upstream content-type", {
@@ -74,31 +68,26 @@ export async function POST(req: Request) {
       });
     }
 
-    // On lit un chunk pour déterminer la taille (évite ZIP vide)
+    // On lit pour éviter un “ZIP fantôme”
     const reader = r.body!.getReader();
     const chunks: Uint8Array[] = [];
     let total = 0;
     while (true) {
       const { value, done } = await reader.read();
       if (done) break;
-      chunks.push(value!);
-      total += value!.length;
-      // sécurité : on peut stopper si trop gros, ici on laisse passer
+      if (value) { chunks.push(value); total += value.length; }
     }
-
-    // “Zip vide” (8–15kb) => souvent erreur backend compressée → essaye de décoder
     if (total < 2048) {
       let txt = "";
       try { txt = new TextDecoder().decode(Buffer.concat(chunks as any)); } catch {}
-      return new Response(
-        txt || "Upstream returned a tiny file (likely cold start/timeout).",
-        { status: 502, headers: { "content-type": "text/plain; charset=utf-8" } }
-      );
+      return new Response(txt || "Upstream returned a tiny file (likely cold start/timeout).", {
+        status: 502, headers: { "content-type": "text/plain; charset=utf-8" }
+      });
     }
 
     const zip = new Blob(chunks, { type: ct });
     const cd = r.headers.get("content-disposition")
-      || `attachment; filename="docsafe_v2_result.zip"`;
+      || `attachment; filename="docsafe_v1_result.zip"`;
 
     return new Response(zip.stream(), {
       headers: {
@@ -108,10 +97,7 @@ export async function POST(req: Request) {
       },
     });
   } catch (e: any) {
-    return Response.json(
-      { error: e?.message || "Proxy failed (timeout?)" },
-      { status: 504 }
-    );
+    return Response.json({ error: e?.message || "Proxy failed (timeout?)" }, { status: 504 });
   }
 }
 

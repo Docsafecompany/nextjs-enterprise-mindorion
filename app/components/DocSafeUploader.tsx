@@ -24,7 +24,6 @@ function writeUsed(n: number) {
   localStorage.setItem(KEY, String(n));
   document.cookie = `${KEY}=${n}; Path=/; Max-Age=${60 * 60 * 24 * 2}; SameSite=Lax`;
 }
-
 function parseFilenameFromCD(cd: string | null | undefined): string {
   if (!cd) return "docsafe_result.zip";
   const m = /filename\*?=(?:UTF-8'')?([^;]+)|filename="?([^"]+)"?/i.exec(cd);
@@ -47,17 +46,14 @@ export default function DocSafeUploader({
   const [file, setFile] = useState<File | null>(null);
 
   const openPicker = () => inputRef.current?.click();
-
   useEffect(() => {
     const handler = () => openPicker();
     window.addEventListener("docsafe:open-picker", handler as unknown as EventListener);
     return () => window.removeEventListener("docsafe:open-picker", handler as unknown as EventListener);
   }, []);
-
   useEffect(() => { onUsageUpdate?.(used); }, [used, onUsageUpdate]);
 
   const prevent = (e: React.DragEvent) => { e.preventDefault(); e.stopPropagation(); };
-
   const onDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     prevent(e);
     const files = e.dataTransfer?.files;
@@ -71,7 +67,7 @@ export default function DocSafeUploader({
   async function process(target: File | null) {
     if (!target) { openPicker(); return; }
     setBusy(true);
-    setMsg("Processing on server…");
+    setMsg("Cleaning on server… (V1)");
     try {
       const fd = new FormData();
       fd.append("file", target);
@@ -79,27 +75,24 @@ export default function DocSafeUploader({
       fd.append("strictPdf", "false");
 
       const res = await fetch("/api/docsafe", { method: "POST", body: fd });
-
       const ct = res.headers.get("content-type") || "";
+
       if (!res.ok) {
         const txt = ct.includes("json") ? JSON.stringify(await res.json()) : await res.text();
         throw new Error(txt || `HTTP ${res.status}`);
       }
 
       const blob = await res.blob();
-
-      // Refuse tout ce qui n'est pas ZIP/octet-stream
       if (!ct.startsWith("application/zip") && !ct.startsWith("application/octet-stream")) {
         const txt = await blob.text().catch(() => "");
         throw new Error(txt || "Unexpected response (not a ZIP).");
       }
-      // Refuse les micro-zips “vides”
       if (blob.size < 2048) {
         const txt = await blob.text().catch(() => "");
         throw new Error(txt || "ZIP too small (upstream likely timed out).");
       }
 
-      const filename = parseFilenameFromCD(res.headers.get("content-disposition"));
+      const filename = parseFilenameFromCD(res.headers.get("content-disposition")) || "docsafe_v1_result.zip";
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
@@ -112,13 +105,11 @@ export default function DocSafeUploader({
       const next = used + 1;
       writeUsed(next);
       setUsed(next);
-      setMsg("Processed successfully — download should have started.");
+      setMsg("Cleaned successfully — download should have started.");
     } catch (err: any) {
       setMsg(err?.message || "Unexpected error");
       console.error("DocSafeUploader error:", err);
-    } finally {
-      setBusy(false);
-    }
+    } finally { setBusy(false); }
   }
 
   const onPicked = (f: File | null) => {
@@ -155,7 +146,7 @@ export default function DocSafeUploader({
               disabled={busy || !file}
               className="rounded-xl border px-4 py-2.5 text-sm font-semibold hover:bg-gray-50 disabled:opacity-60"
             >
-              Process &amp; Download
+              Clean &amp; Download
             </button>
 
             {file && (
@@ -174,13 +165,9 @@ export default function DocSafeUploader({
           {msg && (
             <div className="mt-2 rounded-lg bg-gray-50 px-3 py-2 text-xs text-gray-700">
               {msg} ·{" "}
-              <a href="/pricing" className="font-semibold text-indigo-600 hover:text-indigo-500">
-                Pricing
-              </a>{" "}
+              <a href="/pricing" className="font-semibold text-indigo-600 hover:text-indigo-500">Pricing</a>{" "}
               •{" "}
-              <a href="/sign-up" className="font-semibold text-indigo-600 hover:text-indigo-500">
-                Create account
-              </a>
+              <a href="/sign-up" className="font-semibold text-indigo-600 hover:text-indigo-500">Create account</a>
             </div>
           )}
         </div>
@@ -215,7 +202,7 @@ export default function DocSafeUploader({
               disabled={busy}
               className="rounded-xl bg-indigo-600 px-4 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500 disabled:opacity-60"
             >
-              Process &amp; Download
+              Clean &amp; Download
             </button>
           </div>
 
