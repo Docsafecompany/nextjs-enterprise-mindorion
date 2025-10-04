@@ -12,6 +12,7 @@ type Props = {
 };
 
 const KEY = "docsafe_free_used";
+
 function readUsed(): number {
   if (typeof window === "undefined") return 0;
   const raw = localStorage.getItem(KEY);
@@ -23,25 +24,13 @@ function writeUsed(n: number) {
   localStorage.setItem(KEY, String(n));
   document.cookie = `${KEY}=${n}; Path=/; Max-Age=${60 * 60 * 24 * 2}; SameSite=Lax`;
 }
-function filenameFromDisposition(disp?: string | null) {
-  if (!disp) return undefined;
-  const m = /filename\*?=(?:UTF-8'')?([^;]+)|filename="?([^"]+)"?/i.exec(disp);
-  if (!m) return undefined;
-  try {
-    return decodeURIComponent((m[1] || m[2] || "").trim());
-  } catch {
-    return (m[1] || m[2] || "").trim();
-  }
-}
-async function downloadBlob(blob: Blob, fallbackName = "docsafe_result.zip") {
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = fallbackName;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
+
+function parseFilenameFromCD(cd: string | null | undefined): string {
+  if (!cd) return "docsafe_result.zip";
+  const m = /filename\*?=(?:UTF-8'')?([^;]+)|filename="?([^"]+)"?/i.exec(cd);
+  if (!m) return "docsafe_result.zip";
+  try { return decodeURIComponent((m[1] || m[2] || "").trim()); }
+  catch { return (m[1] || m[2] || "").trim() || "docsafe_result.zip"; }
 }
 
 export default function DocSafeUploader({
@@ -65,14 +54,9 @@ export default function DocSafeUploader({
     return () => window.removeEventListener("docsafe:open-picker", handler as unknown as EventListener);
   }, []);
 
-  useEffect(() => {
-    onUsageUpdate?.(used);
-  }, [used, onUsageUpdate]);
+  useEffect(() => { onUsageUpdate?.(used); }, [used, onUsageUpdate]);
 
-  const prevent = (e: React.DragEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-  };
+  const prevent = (e: React.DragEvent) => { e.preventDefault(); e.stopPropagation(); };
 
   const onDrop = useCallback((e: React.DragEvent<HTMLDivElement>) => {
     prevent(e);
@@ -84,59 +68,46 @@ export default function DocSafeUploader({
     }
   }, [autoProcessOnPick, compact]);
 
-  const onPicked = (f: File | null) => {
-    setFile(f);
-    setMsg(f ? `Selected: ${f.name}` : null);
-    if (f && autoProcessOnPick && compact) setTimeout(() => process(f), 30);
-  };
-
   async function process(target: File | null) {
-    if (!target) {
-      openPicker();
-      return;
-    }
+    if (!target) { openPicker(); return; }
     setBusy(true);
     setMsg("Processing on server…");
     try {
       const fd = new FormData();
       fd.append("file", target);
-      // Use "correct" for V1 (only cleaning), "rephrase" for V2 (clean + rephrase)
-      fd.append("mode", "rephrase"); // <-- change to "correct" if you want V1
       fd.append("lang", "auto");
       fd.append("strictPdf", "false");
 
       const res = await fetch("/api/docsafe", { method: "POST", body: fd });
 
-      if (res.status === 402 || res.status === 429) {
-        setMsg(`Free limit reached (${freeLimit}). Create an account or see Pricing.`);
-        return;
-      }
-
+      const ct = res.headers.get("content-type") || "";
       if (!res.ok) {
-        // try to read error body
-        const ct = res.headers.get("content-type") || "";
-        let text = "";
-        try {
-          text = ct.includes("application/json") ? JSON.stringify(await res.json()) : await res.text();
-        } catch (e) {
-          text = `HTTP ${res.status}`;
-        }
-        throw new Error(text || `Processing failed (status ${res.status})`);
+        const txt = ct.includes("json") ? JSON.stringify(await res.json()) : await res.text();
+        throw new Error(txt || `HTTP ${res.status}`);
       }
 
       const blob = await res.blob();
-      const disp = res.headers.get("content-disposition");
-      const name = filenameFromDisposition(disp) || `docsafe_result.zip`;
 
-      // If it's JSON disguised, show it
-      const ct = res.headers.get("content-type") || "";
-      if (ct.includes("application/json")) {
-        const text = await blob.text();
-        setMsg(text || "Unexpected JSON response from server.");
-        return;
+      // Refuse tout ce qui n'est pas ZIP/octet-stream
+      if (!ct.startsWith("application/zip") && !ct.startsWith("application/octet-stream")) {
+        const txt = await blob.text().catch(() => "");
+        throw new Error(txt || "Unexpected response (not a ZIP).");
+      }
+      // Refuse les micro-zips “vides”
+      if (blob.size < 2048) {
+        const txt = await blob.text().catch(() => "");
+        throw new Error(txt || "ZIP too small (upstream likely timed out).");
       }
 
-      await downloadBlob(blob, name);
+      const filename = parseFilenameFromCD(res.headers.get("content-disposition"));
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
 
       const next = used + 1;
       writeUsed(next);
@@ -149,6 +120,12 @@ export default function DocSafeUploader({
       setBusy(false);
     }
   }
+
+  const onPicked = (f: File | null) => {
+    setFile(f);
+    setMsg(f ? `Selected: ${f.name}` : null);
+    if (f && autoProcessOnPick && compact) setTimeout(() => process(f), 30);
+  };
 
   return (
     <div className="space-y-3">
