@@ -8,6 +8,8 @@ type Props = {
   onUsageUpdate?: (used: number) => void;
   freeLimit?: number;
   autoProcessOnPick?: boolean;
+  isPaid?: boolean;                   // 👉 Starter/Pro ?
+  onDownloadComplete?: () => void;    // feedback après download
 };
 
 const KEY = "docsafe_free_used";
@@ -30,6 +32,8 @@ export default function DocSafeUploader({
   onUsageUpdate,
   freeLimit = 3,
   autoProcessOnPick = false,
+  isPaid = false,
+  onDownloadComplete,
 }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [busy, setBusy] = useState(false);
@@ -37,7 +41,7 @@ export default function DocSafeUploader({
   const [used, setUsed] = useState<number>(() => readUsed());
   const [file, setFile] = useState<File | null>(null);
 
-  // ⬇️ Récupère l'URL exposée par layout.tsx
+  // URL backend injectée dans window.__DOCSAFE_BACKEND__
   const backend =
     (typeof window !== "undefined" && (window as any).__DOCSAFE_BACKEND__) || "";
 
@@ -55,7 +59,14 @@ export default function DocSafeUploader({
     onUsageUpdate?.(used);
   }, [used, onUsageUpdate]);
 
-  async function process(target: File | null) {
+  async function processV1(target: File | null) {
+    return coreProcess(target, `${backend}/clean`, "docsafe_v1_result.zip");
+  }
+  async function processV2(target: File | null) {
+    return coreProcess(target, `${backend}/clean-v2`, "docsafe_v2_result.zip");
+  }
+
+  async function coreProcess(target: File | null, url: string, fallbackName: string) {
     if (!target) {
       openPicker();
       return;
@@ -64,16 +75,13 @@ export default function DocSafeUploader({
     setMsg("Processing your document…");
 
     try {
-      if (!backend) {
-        throw new Error("Backend URL missing: window.__DOCSAFE_BACKEND__ is empty");
-      }
+      if (!backend) throw new Error("Backend URL missing: window.__DOCSAFE_BACKEND__ is empty");
 
       const fd = new FormData();
       fd.append("file", target);
-      fd.append("strictPdf", "false"); // V1
+      fd.append("strictPdf", "false");
 
-      const res = await fetch(`${backend}/clean`, { method: "POST", body: fd });
-
+      const res = await fetch(url, { method: "POST", body: fd });
       if (!res.ok) {
         const text = await res.text();
         throw new Error(text || `HTTP ${res.status}`);
@@ -86,23 +94,22 @@ export default function DocSafeUploader({
       const headerFilename = match ? decodeURIComponent((match[1] || match[2] || "").trim()) : "";
       const downloadName =
         headerFilename ||
-        ((res.headers.get("content-type") || "").includes("zip")
-          ? "docsafe_v1_result.zip"
-          : "cleaned.docx");
+        ((res.headers.get("content-type") || "").includes("zip") ? fallbackName : "output.zip");
 
-      const url = URL.createObjectURL(blob);
+      const href = URL.createObjectURL(blob);
       const a = document.createElement("a");
-      a.href = url;
+      a.href = href;
       a.download = downloadName;
       document.body.appendChild(a);
       a.click();
       a.remove();
-      URL.revokeObjectURL(url);
+      URL.revokeObjectURL(href);
 
       const next = used + 1;
       writeUsed(next);
       setUsed(next);
       setMsg("✅ Processed successfully — your file has been downloaded.");
+      try { onDownloadComplete?.(); } catch {}
     } catch (err: any) {
       console.error(err);
       setMsg(err?.message || "Unexpected error during processing.");
@@ -114,7 +121,16 @@ export default function DocSafeUploader({
   const onPicked = (f: File | null) => {
     setFile(f);
     setMsg(f ? `Selected: ${f.name}` : null);
-    if (f && autoProcessOnPick && compact) setTimeout(() => process(f), 30);
+    if (f && autoProcessOnPick && compact) setTimeout(() => processV1(f), 30);
+  };
+
+  const handleRephraseClick = () => {
+    if (!isPaid) {
+      // Free user → page pricing
+      window.location.href = "/pricing";
+      return;
+    }
+    processV2(file);
   };
 
   return (
@@ -138,13 +154,29 @@ export default function DocSafeUploader({
             {busy ? "Uploading…" : "Choose file"}
           </button>
 
-        <button
+          {/* V1 */}
+          <button
             type="button"
-            onClick={() => process(file)}
+            onClick={() => processV1(file)}
             disabled={busy || !file}
             className="rounded-xl border px-4 py-2.5 text-sm font-semibold hover:bg-gray-50 disabled:opacity-60"
           >
             Clean &amp; Download
+          </button>
+
+          {/* V2 — Starter/Pro only */}
+          <button
+            type="button"
+            onClick={handleRephraseClick}
+            disabled={busy || !file || !isPaid}
+            title={!isPaid ? "Starter / Pro only" : undefined}
+            className={`rounded-xl px-4 py-2.5 text-sm font-semibold ${
+              isPaid
+                ? "border text-slate-900 hover:bg-gray-50"
+                : "border bg-gray-100 text-gray-400 cursor-not-allowed"
+            }`}
+          >
+            Clean &amp; Rephrase
           </button>
 
           {file && (
