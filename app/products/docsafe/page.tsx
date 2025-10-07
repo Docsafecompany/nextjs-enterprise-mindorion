@@ -85,12 +85,12 @@ export default function DocSafePage() {
           <Step icon="↓" title="3. Download" desc="Ready-to-share, layout preserved" />
         </div>
 
-        <ul className="mt-6 space-y-2 text-sm text-slate-700">
-          <li>• Protect privacy by removing metadata & comments</li>
-          <li>• Correct spelling, grammar and punctuation</li>
-          <li>• Keep tables, slides, images and styles untouched</li>
-          <li>• Batch multiple files and export as a ZIP</li>
-        </ul>
+        <ul className="mt-6 grid grid-cols-1 gap-x-8 gap-y-1 text-sm text-slate-700 sm:grid-cols-2">
+  <li>• <strong>Remove hidden data:</strong> comments, tracked changes, annotations, metadata</li>
+  <li>• <strong>Correct text:</strong> spelling, grammar, punctuation</li>
+  <li>• <strong>Preserve layout:</strong> tables, slides, images, and styles stay the same</li>
+  <li>• <strong>Generate report:</strong> clear summary of all fixes and cleanups</li>
+</ul>
       </section>
 
       {/* WHY USE DOCSAFE */}
