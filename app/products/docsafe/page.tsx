@@ -55,10 +55,10 @@ export default function DocSafePage() {
       {/* HEADER */}
       <div className="text-center">
         <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl">
-          Upload your document
+          Docsafe
         </h1>
         <p className="mx-auto mt-3 max-w-3xl text-slate-600">
-          Make your files error-free, secure, and professional in seconds — without changing the original layout.
+          Protect your content, polish your style, and keep your layout intact. All in one click.
         </p>
 
         {/* Bloc compact : Choose file + Process & Download + Selected */}
