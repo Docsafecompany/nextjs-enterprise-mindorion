@@ -20,10 +20,10 @@ const plans: Plan[] = [
     cadence: "forever",
     features: [
       "1 user",
-      "Access to DocSafe V1 (metadata cleaning, grammar, spelling, punctuation)",
+      "Basic cleaning (metadata, grammar, spelling)",
       "Layout preserved (PDF, DOCX, PPTX)",
-      "Clean and download processed file",
-      "Light quotas (e.g. 100 pages/day, 500 pages/month)",
+      "Download ready-to-share files",
+      "Light usage limit (100 pages/day, 500 pages/month)",
       "Community support",
       "“Powered by DocSafe” watermark",
     ],
@@ -35,15 +35,16 @@ const plans: Plan[] = [
     title: "Starter",
     price: "€9.90",
     cadence: "per month",
+    badge: "Popular",
     highlight: true,
     features: [
       "1 user",
       "Everything in Free",
-      "Access to DocSafe V2 (AI rephrase, clarity, tone)",
-      "Priority processing (faster jobs)",
-      "Extended quotas (e.g. 2,000 pages/month, 150 MB/file)",
-      "Remove “Powered by” + add your own logo",
-      "Early access to upcoming features (auto-summary, AI settings, glossary)",
+      "AI rephrase & clarity (V2)",
+      "Faster processing",
+      "Bigger quotas (2,000 pages/month, 150 MB/file)",
+      "Remove watermark + use your logo",
+      "Early access to new AI features",
       "Email support (24–48h)",
     ],
     ctaHref: "/sign-up?plan=starter",
@@ -57,9 +58,9 @@ const plans: Plan[] = [
     features: [
       "Up to 5 users included",
       "Everything in Starter",
-      "High quotas (e.g. 25,000 pages/month, 300 MB/file)",
-      "Shared folders and team spaces",
-      "Branding options (logo, shared subdomain)",
+      "Large quotas (25,000 pages/month, 300 MB/file)",
+      "Shared folders & team spaces",
+      "Custom branding (logo, subdomain)",
       "Priority support (<24h)",
     ],
     ctaHref: "/sign-up?plan=pro",
@@ -177,7 +178,10 @@ function PlanCard({
       <ul className="mt-6 space-y-2 text-sm text-slate-700">
         {features.map((f, i) => (
           <li key={i} className="flex items-start">
-            <span className="mr-2 mt-0.5 inline-flex h-5 w-5 items-center justify-center rounded-full bg-indigo-600 text-[10px] font-bold text-white">
+            <span
+              aria-hidden
+              className="mr-2 mt-0.5 inline-flex h-5 w-5 items-center justify-center rounded-full bg-indigo-600 text-[10px] font-bold text-white"
+            >
               ✓
             </span>
             <span>{f}</span>
@@ -193,4 +197,3 @@ function PlanCard({
     </div>
   );
 }
-
