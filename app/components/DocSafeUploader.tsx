@@ -8,8 +8,8 @@ type Props = {
   onUsageUpdate?: (used: number) => void;
   freeLimit?: number;
   autoProcessOnPick?: boolean;
-  isPaid?: boolean;                   // 👉 Starter/Pro ?
-  onDownloadComplete?: () => void;    // feedback après download
+  isPaid?: boolean;                   // Starter/Pro ?
+  onDownloadComplete?: () => void;    // feedback after download
 };
 
 const KEY = "docsafe_free_used";
@@ -41,7 +41,6 @@ export default function DocSafeUploader({
   const [used, setUsed] = useState<number>(() => readUsed());
   const [file, setFile] = useState<File | null>(null);
 
-  // URL backend injectée dans window.__DOCSAFE_BACKEND__
   const backend =
     (typeof window !== "undefined" && (window as any).__DOCSAFE_BACKEND__) || "";
 
@@ -126,8 +125,7 @@ export default function DocSafeUploader({
 
   const handleRephraseClick = () => {
     if (!isPaid) {
-      // Free user → page pricing
-      window.location.href = "/pricing";
+      window.location.href = "/pricing"; // Free → Pricing
       return;
     }
     processV2(file);
@@ -201,5 +199,3 @@ export default function DocSafeUploader({
     </div>
   );
 }
-
-

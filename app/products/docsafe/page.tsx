@@ -1,19 +1,11 @@
 // app/products/docsafe/page.tsx
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import DocSafeUploader from "../../components/DocSafeUploader";
 import Link from "next/link";
 
-/* ---- Clerk (optionnel) : détecte le plan utilisateur ---- */
-let useUser: any = () => ({ user: null }); // fallback si Clerk non installé
-try {
-  // @ts-ignore
-  const clerk = require("@clerk/nextjs");
-  useUser = clerk.useUser;
-} catch {}
-
-/* Helpers UI très simples */
+/* Helpers UI */
 function Step({ icon, title, desc }: { icon: string; title: string; desc: string }) {
   return (
     <div className="text-center">
@@ -54,7 +46,7 @@ function FAQItem({ q, a }: { q: string; a: React.ReactNode }) {
   );
 }
 
-/* -------- Feedback box (après téléchargement) -------- */
+/* Feedback box (after download) */
 function FeedbackBox({
   visible,
   onClose,
@@ -171,12 +163,17 @@ export default function DocSafePage() {
   const [used, setUsed] = useState(0);
   const [showFeedback, setShowFeedback] = useState(false);
 
-  // Plan utilisateur via Clerk
-  const { user } = useUser();
-  const isPaid = useMemo(() => {
-    const plan = (user?.publicMetadata as any)?.plan;
-    return plan === "starter" || plan === "pro";
-  }, [user]);
+  // ✅ No Clerk import: determine plan on client only
+  const [plan, setPlan] = useState<string>("free");
+  useEffect(() => {
+    // Option 1: window.__USER_PLAN__ injected by your layout
+    const fromWindow = (typeof window !== "undefined" && (window as any).__USER_PLAN__) || "";
+    // Option 2: localStorage "plan" set after login
+    const fromLS = typeof window !== "undefined" ? localStorage.getItem("plan") || "" : "";
+    const p = String(fromWindow || fromLS || "free").toLowerCase();
+    setPlan(p);
+  }, []);
+  const isPaid = useMemo(() => plan === "starter" || plan === "pro", [plan]);
 
   return (
     <main className="mx-auto max-w-6xl px-4 py-10 md:py-14">
@@ -187,24 +184,23 @@ export default function DocSafePage() {
           Protect your content, polish your style, and keep your layout intact. All in one click.
         </p>
 
-        {/* Bloc compact : Choose file + Process */}
+        {/* Uploader */}
         <div className="mt-6 flex justify-center">
           <DocSafeUploader
             compact
             showQuotaLine={false}
             freeLimit={FREE_LIMIT}
             onUsageUpdate={(n) => setUsed(n)}
-            isPaid={isPaid}                      // 👉 active “Clean & Rephrase” uniquement Starter/Pro
+            isPaid={isPaid}                         // 🔒 Clean & Rephrase = Starter/Pro only
             onDownloadComplete={() => setShowFeedback(true)}
           />
         </div>
 
-        {/* Ligne globale sous le header */}
         <p className="mt-2 text-sm text-gray-500">
           No sign-up required · Free to use (beta) : {FREE_LIMIT} files. Used {Math.min(used, FREE_LIMIT)}/{FREE_LIMIT}
         </p>
 
-        {/* Feedback (zone rouge) */}
+        {/* Feedback (red zone) */}
         <FeedbackBox visible={showFeedback} onClose={() => setShowFeedback(false)} />
       </div>
 
@@ -224,7 +220,7 @@ export default function DocSafePage() {
         </ul>
       </section>
 
-      {/* WHY USE DOCSAFE */}
+      {/* WHY */}
       <section className="mt-12">
         <h2 className="text-center text-2xl font-bold">Why use DocSafe?</h2>
         <div className="mt-6 grid gap-4 md:grid-cols-2">
@@ -261,7 +257,7 @@ export default function DocSafePage() {
         </div>
       </section>
 
-      {/* CTAs Footer */}
+      {/* CTAs */}
       <section className="mt-10 flex items-center justify-center gap-3">
         <Link href="/sign-up" className="rounded-xl border px-5 py-2.5 text-sm font-semibold hover:bg-gray-50">
           Create account

@@ -13,16 +13,44 @@ export const metadata = {
 // Empêche le prerender de planter si Clerk est incomplet
 export const dynamic = "force-dynamic";
 
+/** Expose l'URL du backend au navigateur (utilisé par DocSafeUploader) */
 function BackendExposeScript() {
-  // On lit d'abord la version publique; si absente on tente la non-publique
   const backendUrl =
     process.env.NEXT_PUBLIC_DOCSAFE_BACKEND_URL ||
     process.env.DOCSAFE_BACKEND_URL ||
     "";
-
-  // On publie la valeur côté navigateur
   const payload = `window.__DOCSAFE_BACKEND__ = ${JSON.stringify(backendUrl)};`;
+  return <script dangerouslySetInnerHTML={{ __html: payload }} />;
+}
 
+/**
+ * Expose le plan utilisateur au navigateur pour activer le bouton
+ * "Clean & Rephrase" côté front sans casser le build.
+ *
+ * Priorité :
+ *  1) localStorage["plan"] (écris-le après login/checkout : "starter" | "pro" | "free")
+ *  2) cookie plan=...
+ *  3) défaut: "free"
+ *
+ * NB: Tu peux surcharger pour un test rapide :
+ *   localStorage.setItem("plan","starter"); // puis reload
+ */
+function UserPlanExposeScript() {
+  const payload = `
+    (function(){
+      try {
+        var p = (localStorage.getItem("plan") || "").toLowerCase();
+        if (!p) {
+          var m = document.cookie.match(/(?:^|; )plan=([^;]+)/);
+          if (m && m[1]) p = decodeURIComponent(m[1]).toLowerCase();
+        }
+        if (!p) p = "free";
+        window.__USER_PLAN__ = p;
+      } catch (e) {
+        window.__USER_PLAN__ = "free";
+      }
+    })();
+  `;
   return <script dangerouslySetInnerHTML={{ __html: payload }} />;
 }
 
@@ -46,6 +74,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           <Navbar />
           <main className="flex-1">{children}</main>
           <Footer />
+
+          {/* Expose le plan utilisateur côté client (starter/pro/free) */}
+          <UserPlanExposeScript />
         </body>
       </html>
     );
@@ -62,10 +93,14 @@ export default function RootLayout({ children }: { children: ReactNode }) {
           <Navbar />
           <main className="flex-1">{children}</main>
           <Footer />
+
+          {/* Expose le plan utilisateur côté client (starter/pro/free) */}
+          <UserPlanExposeScript />
         </body>
       </html>
     </ClerkProvider>
   );
 }
+
 
 
