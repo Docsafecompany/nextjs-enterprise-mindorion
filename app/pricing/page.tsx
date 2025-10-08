@@ -15,71 +15,56 @@ type Plan = {
 
 const plans: Plan[] = [
   {
-    title: "Free Plan",
-    price: "$0",
+    title: "Free",
+    price: "€0",
     cadence: "forever",
     features: [
       "1 user",
-      "PDF, DOCX, PPTX support",
-      "V1: metadata cleaning (PDF), spelling/grammar, spacing & punctuation",
-      "Strict PDF option (remove hidden/invisible text)",
-      "Formatting preserved (Word/PowerPoint styles intact)",
-      "Batch: 1 file per job, ZIP output",
-      "HTML report with changes",
-      "Limits: 50 MB/file, 100 pages/day, 500 pages/month, 5 jobs/day",
-      "Download links valid 1h",
+      "Access to DocSafe V1 (metadata cleaning, grammar, spelling, punctuation)",
+      "Layout preserved (PDF, DOCX, PPTX)",
+      "Clean and download processed file",
+      "Light quotas (e.g. 100 pages/day, 500 pages/month)",
       "Community support",
-      "“Powered by DocSafe” in report",
+      "“Powered by DocSafe” watermark",
     ],
     ctaHref: "/products/docsafe",
-    ctaLabel: "Select",
-    footer: "Great for trying DocSafe",
+    ctaLabel: "Try for Free",
+    footer: "Perfect for testing DocSafe",
   },
   {
     title: "Starter",
-    price: "$15",
+    price: "€9.90",
     cadence: "per month",
-    badge: "30 Day Free Trial",
     highlight: true,
     features: [
       "1 user",
       "Everything in Free",
-      "Queue priority, faster processing",
-      "Batch: up to 10 files per job",
-      "V2 rephrase: unlimited (within monthly pages)",
-      "File size up to 150 MB",
-      "Quotas: 5,000 pages/month, 200 jobs/day",
-      "Remove “Powered by” + add your logo",
-      "Download links valid 7 days",
-      "AI settings: tone, default language, mini glossary (100 terms)",
+      "Access to DocSafe V2 (AI rephrase, clarity, tone)",
+      "Priority processing (faster jobs)",
+      "Extended quotas (e.g. 2,000 pages/month, 150 MB/file)",
+      "Remove “Powered by” + add your own logo",
+      "Early access to upcoming features (auto-summary, AI settings, glossary)",
       "Email support (24–48h)",
-      "30-day free trial",
     ],
     ctaHref: "/sign-up?plan=starter",
-    ctaLabel: "Start Free Trial",
-    footer: "Best for individuals",
+    ctaLabel: "Subscribe",
+    footer: "Best for freelancers & students",
   },
   {
     title: "Pro",
-    price: "$40",
+    price: "€24.90",
     cadence: "per month",
     features: [
-      "Up to 5 users included (extra seats $8/user/mo)",
+      "Up to 5 users included",
       "Everything in Starter",
-      "Batch: up to 50 files per job",
-      "File size up to 300 MB",
-      "Quotas: 25,000 pages/month, 500 jobs/day",
-      "Team workspace: roles, shared folders",
-      "Analytics: usage, processing time, V1/V2 ratio",
-      "API & Webhooks, per-project API keys",
-      "Branding+: logo & colors, custom share domain (CNAME)",
-      "Security: basic audit log, Google SSO",
-      "Model choice per job: gpt-4o / gpt-4o-mini",
-      "Priority support (<24h), best-effort 99.9% SLA",
+      "High quotas (e.g. 25,000 pages/month, 300 MB/file)",
+      "Shared folders and team spaces",
+      "Branding options (logo, shared subdomain)",
+      "Priority support (<24h)",
     ],
-    ctaHref: "/contact?plan=pro",
-    ctaLabel: "Select",
-    footer: "For small teams & power users",
+    ctaHref: "/sign-up?plan=pro",
+    ctaLabel: "Subscribe",
+    footer: "Ideal for small teams & startups",
   },
 ];
 
@@ -92,7 +77,7 @@ export default function PricingPage() {
           Simple pricing for every team
         </h1>
         <p className="mt-3 text-slate-600">
-          Clean, correct, and rephrase documents at scale — with layout preserved.
+          Clean, correct, and rephrase documents — with layout perfectly preserved.
         </p>
       </section>
 
@@ -104,24 +89,44 @@ export default function PricingPage() {
           ))}
         </div>
 
-        {/* Add-ons */}
-        <div className="mx-auto mt-12 max-w-3xl rounded-2xl border border-slate-200 p-6">
-          <h3 className="text-lg font-semibold text-slate-900">Add-ons</h3>
-          <ul className="mt-3 list-disc space-y-1 pl-5 text-slate-600">
-            <li>Page packs (1k / 5k / 25k pages)</li>
-            <li>Overages billed per 1,000 pages</li>
-            <li>Dedicated region (EU/US) & KMS encryption</li>
-            <li>Enterprise: SSO SAML, DPA, advanced audit, Private/VPC, onboarding</li>
-          </ul>
+        {/* Enterprise / Contact */}
+        <div className="mx-auto mt-12 max-w-5xl rounded-2xl border border-slate-200 p-6">
+          <div className="grid gap-6 md:grid-cols-2">
+            <div>
+              <h3 className="text-lg font-semibold text-slate-900">
+                Need an Enterprise plan?
+              </h3>
+              <p className="mt-2 text-slate-600">
+                API integration, custom quotas, onboarding & training, dedicated hosting (EU/US),
+                SLA, and premium support — tailor-made for your company.
+              </p>
+            </div>
+            <div className="flex items-center md:justify-end">
+              <div className="flex gap-3">
+                <Link
+                  href="/contact"
+                  className="inline-flex items-center justify-center rounded-xl border border-slate-300 px-5 py-2.5 font-semibold text-slate-900 hover:bg-slate-50"
+                >
+                  Contact form
+                </Link>
+                <a
+                  href="mailto:contact@mindorion.com?subject=Enterprise%20Contact%20-%20Mindorion"
+                  className="inline-flex items-center justify-center rounded-xl bg-indigo-600 px-5 py-2.5 font-semibold text-white hover:bg-indigo-700"
+                >
+                  Contact us
+                </a>
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* Notes / fair use */}
+        {/* Notes */}
         <div className="mx-auto mt-8 max-w-4xl text-xs leading-relaxed text-slate-500">
           <p>
-            <strong>Notes.</strong> “Pages” count the total extracted text before AI
-            (multi-layer PDFs may increase logical pages). Password-protected files
-            aren’t processed yet. We do not store documents after delivery; anonymized
-            usage metadata may be retained for analytics (opt-out on Pro).
+            <strong>Notes.</strong> “Pages” represent the total extracted text before AI processing.
+            Multi-layer PDFs may increase logical page counts. Password-protected files are not yet
+            supported. We do not store any documents after delivery; anonymized metadata may be kept
+            for analytics purposes (opt-out available in Pro).
           </p>
         </div>
       </section>
@@ -188,3 +193,4 @@ function PlanCard({
     </div>
   );
 }
+
