@@ -1,13 +1,15 @@
 ﻿// app/pricing/page.tsx
 import Link from "next/link";
 
+type Feature = { label: string; detail?: string };
+
 type Plan = {
   title: string;
   price: string;
   cadence: string;
   badge?: string;
   highlight?: boolean;
-  features: string[];
+  features: Feature[]; // ← uniform features with optional detail
   ctaHref: string;
   ctaLabel: string;
   footer?: string;
@@ -19,13 +21,12 @@ const plans: Plan[] = [
     price: "€0",
     cadence: "forever",
     features: [
-      "1 user",
-      "Basic cleaning (metadata, grammar, spelling)",
-      "Layout preserved (PDF, DOCX, PPTX)",
-      "Download ready-to-share files",
-      "Light usage limit (100 pages/day, 500 pages/month)",
-      "Community support",
-      "“Powered by DocSafe” watermark",
+      { label: "1 user" },
+      { label: "Basic cleaning", detail: "text & metadata" },
+      { label: "Layout preserved", detail: "PDF, DOCX, PPTX" },
+      { label: "Ready-to-share download" },
+      { label: "Light usage", detail: "100 pages/day, 500 pages/month" },
+      { label: "Community support", detail: "includes watermark" },
     ],
     ctaHref: "/products/docsafe",
     ctaLabel: "Try for Free",
@@ -38,14 +39,12 @@ const plans: Plan[] = [
     badge: "Popular",
     highlight: true,
     features: [
-      "1 user",
-      "Everything in Free",
-      "AI rephrase & clarity (V2)",
-      "Faster processing",
-      "Bigger quotas (2,000 pages/month, 150 MB/file)",
-      "Remove watermark + use your logo",
-      "Early access to new AI features",
-      "Email support (24–48h)",
+      { label: "1 user" },
+      { label: "Everything in Free" },
+      { label: "AI rephrase & clarity", detail: "V2" },
+      { label: "Faster processing" },
+      { label: "Bigger quotas", detail: "2,000 pages/month, 150 MB/file" },
+      { label: "No watermark", detail: "+ your logo" },
     ],
     ctaHref: "/sign-up?plan=starter",
     ctaLabel: "Subscribe",
@@ -56,12 +55,12 @@ const plans: Plan[] = [
     price: "€24.90",
     cadence: "per month",
     features: [
-      "Up to 5 users included",
-      "Everything in Starter",
-      "Large quotas (25,000 pages/month, 300 MB/file)",
-      "Shared folders & team spaces",
-      "Custom branding (logo, subdomain)",
-      "Priority support (<24h)",
+      { label: "Up to 5 users" },
+      { label: "Everything in Starter" },
+      { label: "Large quotas", detail: "25,000 pages/month, 300 MB/file" },
+      { label: "Shared folders", detail: "& team spaces" },
+      { label: "Custom branding", detail: "logo & subdomain" },
+      { label: "Priority support", detail: "<24h" },
     ],
     ctaHref: "/sign-up?plan=pro",
     ctaLabel: "Subscribe",
@@ -184,7 +183,10 @@ function PlanCard({
             >
               ✓
             </span>
-            <span>{f}</span>
+            <span>
+              <span className="font-medium text-slate-900">{f.label}</span>
+              {f.detail ? <span className="text-slate-500"> — {f.detail}</span> : null}
+            </span>
           </li>
         ))}
       </ul>
