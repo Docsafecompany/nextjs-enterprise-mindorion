@@ -1,31 +1,9 @@
 // app/products/docsafe/page.tsx
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import DocSafeUploader from "../../components/DocSafeUploader";
-import Link from "next/link";
+import { useEffect, useMemo, useRef, useState } from "react";
 
-/* Small UI helpers */
-function Step({
-  icon,
-  title,
-  desc,
-}: {
-  icon: string;
-  title: string;
-  desc: string;
-}) {
-  return (
-    <div className="flex items-start gap-3 rounded-xl border border-slate-200 p-4">
-      <div className="grid h-9 w-9 flex-none place-items-center rounded-lg bg-indigo-50 text-base">{icon}</div>
-      <div>
-        <div className="text-sm font-semibold text-slate-900">{title}</div>
-        <div className="mt-0.5 text-xs leading-relaxed text-slate-500">{desc}</div>
-      </div>
-    </div>
-  );
-}
-
+/* ----------------------------- Small UI helpers ---------------------------- */
 function Benefit({
   icon,
   title,
@@ -38,7 +16,9 @@ function Benefit({
   return (
     <div className="rounded-2xl border border-slate-200 p-5">
       <div className="flex items-center gap-2 text-slate-900">
-        <span className="grid h-6 w-6 place-items-center rounded-md bg-indigo-50 text-sm">{icon}</span>
+        <span className="grid h-6 w-6 place-items-center rounded-md bg-indigo-50 text-sm">
+          {icon}
+        </span>
         <h3 className="font-semibold">{title}</h3>
       </div>
       <p className="mt-2 text-sm text-slate-600">{children}</p>
@@ -67,7 +47,7 @@ function FAQItem({ q, a }: { q: string; a: React.ReactNode }) {
   );
 }
 
-/* Feedback after download */
+/* ----------------------------- Feedback (post) ----------------------------- */
 function FeedbackBox({
   visible,
   onClose,
@@ -93,7 +73,8 @@ function FeedbackBox({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ rating, email: email || undefined, message }),
       });
-      if (!res.ok) throw new Error((await res.json()).error || "Failed to send feedback");
+      if (!res.ok)
+        throw new Error((await res.json()).error || "Failed to send feedback");
       setDone(true);
       setMessage("");
       setEmail("");
@@ -109,7 +90,10 @@ function FeedbackBox({
     <div className="mt-4 rounded-2xl border bg-white p-4 shadow-sm">
       <div className="flex items-center justify-between">
         <h3 className="text-sm font-semibold text-slate-900">Share quick feedback</h3>
-        <button onClick={onClose} className="rounded-md px-2 py-1 text-xs text-slate-500 hover:bg-slate-50">
+        <button
+          onClick={onClose}
+          className="rounded-md px-2 py-1 text-xs text-slate-500 hover:bg-slate-50"
+        >
           Close
         </button>
       </div>
@@ -135,7 +119,6 @@ function FeedbackBox({
                 ))}
               </div>
             </div>
-
             <div className="md:col-span-2">
               <label className="block text-xs font-medium text-slate-600">Your email (optional)</label>
               <input
@@ -146,7 +129,6 @@ function FeedbackBox({
                 className="mt-1 w-full rounded-md border border-slate-200 px-3 py-2 text-sm outline-none focus:border-indigo-400"
               />
             </div>
-
             <div className="md:col-span-3">
               <label className="block text-xs font-medium text-slate-600">Comment</label>
               <textarea
@@ -182,98 +164,280 @@ function FeedbackBox({
   );
 }
 
+/* ----------------------------- Dropzone (Adobe-like) ----------------------- */
+// Construit toujours "<nom d’origine> cleaned.<ext>" ; si la réponse est un ZIP => .zip
+function computeDownloadName(original: string, res: Response, blob: Blob) {
+  const dot = original.lastIndexOf(".");
+  const base = dot > 0 ? original.slice(0, dot) : original;
+  const ext = dot > 0 ? original.slice(dot + 1).toLowerCase() : "";
+  const ct = (res.headers.get("content-type") || blob.type || "").toLowerCase();
+  const isZip = ct.includes("zip");
+  if (isZip) return `${base} cleaned.zip`;
+  const keep = ["pdf", "doc", "docx", "ppt", "pptx"].includes(ext) ? ext : "zip";
+  return `${base} cleaned.${keep}`;
+}
+
+function DropzoneUploader({ onDone }: { onDone: () => void }) {
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  const [dragOver, setDragOver] = useState(false);
+  const [busy, setBusy] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [eta, setEta] = useState<string>("");
+  const [file, setFile] = useState<File | null>(null);
+  const [message, setMessage] = useState<string | null>(null);
+
+  const openPicker = () => inputRef.current?.click();
+
+  const onDrop = (ev: React.DragEvent<HTMLDivElement>) => {
+    ev.preventDefault();
+    ev.stopPropagation();
+    setDragOver(false);
+    const f = ev.dataTransfer?.files?.[0];
+    if (f) {
+      setFile(f);
+      handleProcess(f);
+    }
+  };
+
+  const onPick = (f: File | null) => {
+    setFile(f);
+    if (f) handleProcess(f);
+  };
+
+  const startOptimisticProgress = (estSeconds: number) => {
+    setProgress(0);
+    setEta(`${estSeconds}s`);
+    const start = Date.now();
+    const target = Math.max(6, estSeconds);
+    const id = setInterval(() => {
+      const elapsed = (Date.now() - start) / 1000;
+      const pct = Math.min(90, Math.floor((elapsed / target) * 90));
+      const remaining = Math.max(0, Math.ceil(target - elapsed));
+      setProgress(pct);
+      setEta(`${remaining}s`);
+    }, 300);
+    return () => clearInterval(id);
+  };
+
+  async function handleProcess(target: File) {
+    try {
+      setBusy(true);
+      setMessage(null);
+      setProgress(0);
+      setEta("");
+
+      const est = Math.ceil(target.size / (1024 * 1024)) + 3;
+      const stopProgress = startOptimisticProgress(est);
+
+      const fd = new FormData();
+      fd.append("file", target);
+      fd.append("strictPdf", "false");
+
+      const res = await fetch("/api/docsafe", { method: "POST", body: fd });
+
+      stopProgress();
+
+      if (!res.ok) {
+        const txt = await res.text();
+        throw new Error(txt || `HTTP ${res.status}`);
+      }
+
+      setProgress(100);
+      setEta("");
+
+      const blob = await res.blob();
+
+      const downloadName = computeDownloadName(target.name, res, blob);
+
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = downloadName;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+
+      setMessage("✅ Processed successfully — your file has been downloaded.");
+      onDone?.();
+    } catch (err: any) {
+      setMessage(err?.message || "Unexpected error. Please try again.");
+    } finally {
+      setBusy(false);
+      setTimeout(() => setProgress(0), 1200);
+    }
+  }
+
+  return (
+    <div className="w-full">
+      <input
+        ref={inputRef}
+        type="file"
+        accept=".pdf,.doc,.docx,.ppt,.pptx,application/pdf,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.openxmlformats-officedocument.presentationml.presentation"
+        className="hidden"
+        onChange={(e) => onPick(e.target.files?.[0] ?? null)}
+      />
+
+      {/* Encadré drop (titre + sous-titre + illustration) */}
+      <div
+        onDragOver={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setDragOver(true);
+        }}
+        onDragLeave={(e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          setDragOver(false);
+        }}
+        onDrop={onDrop}
+        className={`relative mx-auto grid min-h-[320px] w-full place-items-center rounded-2xl border-2 border-dashed p-8 text-center transition
+          ${dragOver ? "border-indigo-400 bg-indigo-50/70" : "border-indigo-200 bg-white"}`}
+      >
+        <div className="max-w-2xl">
+          <h1 className="text-2xl font-extrabold tracking-tight text-slate-900 sm:text-3xl">
+            Clean, correct & preserve your layout
+          </h1>
+          <p className="mt-2 text-sm text-slate-600">
+            Drag &amp; drop a PDF, DOCX or PPTX, or click below.
+          </p>
+
+          <button
+            type="button"
+            onClick={openPicker}
+            disabled={busy}
+            className="mt-5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-5 py-2.5 text-sm font-semibold text-white shadow-sm hover:opacity-95 disabled:opacity-60"
+          >
+            {busy ? "Working…" : "Select a file"}
+          </button>
+
+          {file && (
+            <div className="mt-2 max-w-[56ch] truncate text-xs text-slate-500">
+              Selected: {file.name}
+            </div>
+          )}
+
+          {(busy || progress > 0) && (
+            <div className="mx-auto mt-4 w-full max-w-md">
+              <div className="h-2 w-full overflow-hidden rounded bg-slate-100">
+                <div
+                  className="h-full rounded bg-gradient-to-r from-indigo-600 to-violet-600 transition-all"
+                  style={{ width: `${progress}%` }}
+                />
+              </div>
+              <div className="mt-1 text-xs text-slate-500">
+                {progress < 100 ? <>Processing… ~ {eta} left</> : <>Finishing…</>}
+              </div>
+            </div>
+          )}
+
+          {message && (
+            <div className="mx-auto mt-3 max-w-md rounded-md bg-gray-50 px-3 py-2 text-xs text-gray-700">
+              {message}
+            </div>
+          )}
+        </div>
+
+        {/* Illustration dans l’encadré (coin bas-droite) */}
+        <div className="pointer-events-none absolute bottom-6 right-6 hidden sm:block">
+          <div className="grid h-40 w-40 place-items-center rounded-2xl bg-white shadow-sm ring-1 ring-indigo-100">
+            <div className="text-5xl">📄✨</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* --------------------------------- Page ------------------------------------ */
 export default function DocSafePage() {
-  const FREE_LIMIT = 3;
-  const [used, setUsed] = useState(0);
+  const [plan, setPlan] = useState<string>("free");
   const [showFeedback, setShowFeedback] = useState(false);
 
-  // client-only plan (no Clerk import here)
-  const [plan, setPlan] = useState<string>("free");
   useEffect(() => {
-    const fromWindow = (typeof window !== "undefined" && (window as any).__USER_PLAN__) || "";
-    const fromLS = typeof window !== "undefined" ? localStorage.getItem("plan") || "" : "";
+    const fromWindow =
+      (typeof window !== "undefined" && (window as any).__USER_PLAN__) || "";
+    const fromLS =
+      typeof window !== "undefined" ? localStorage.getItem("plan") || "" : "";
     const p = String(fromWindow || fromLS || "free").toLowerCase();
     setPlan(p);
   }, []);
   const isPaid = useMemo(() => plan === "starter" || plan === "pro", [plan]);
+  void isPaid;
 
   return (
-    <main className="mx-auto max-w-6xl px-4 py-10 md:py-14">
-      {/* HEADER */}
-      <div className="text-center">
-        <h1 className="text-4xl font-extrabold tracking-tight sm:text-5xl">DocSafe</h1>
-        <p className="mx-auto mt-3 max-w-3xl text-slate-600">
-          Protect your content, polish your style, and keep your layout intact. All in one click.
-        </p>
-      </div>
-
-      {/* UPLOADER + STEPS (side-by-side on md+) */}
-      <section className="mt-6 grid gap-6 md:grid-cols-[1fr,320px]">
-        {/* Uploader card */}
-        <div className="rounded-2xl border bg-white p-5 shadow-sm">
-          <div className="flex justify-center">
-            <DocSafeUploader
-              compact
-              showQuotaLine={false}
-              freeLimit={FREE_LIMIT}
-              onUsageUpdate={(n) => setUsed(n)}
-              // Ces props sont ignorées si ton composant ne les supporte pas : pas bloquant
-              // @ts-expect-error optional
-              isPaid={isPaid}
-              // @ts-expect-error optional
-              onDownloadComplete={() => setShowFeedback(true)}
-            />
-          </div>
-
-          {/* Free limit — made prominent with CTA */}
-          <div className="mt-3 flex flex-col items-center justify-between gap-3 rounded-xl border border-indigo-100 bg-indigo-50/50 px-4 py-3 sm:flex-row">
-            <p className="text-sm">
-              <span className="font-semibold text-indigo-700">Free to use (beta)</span>: {FREE_LIMIT} files.&nbsp;
-              Used <span className="font-semibold text-slate-900">{Math.min(used, FREE_LIMIT)}/{FREE_LIMIT}</span>
-            </p>
-            <div className="flex flex-wrap gap-2">
-              <Link
-                href="/pricing"
-                className="inline-flex items-center rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-500"
-              >
-                Upgrade to Premium
-              </Link>
-              <Link
-                href="/sign-up"
-                className="inline-flex items-center rounded-lg border px-4 py-2 text-sm font-semibold hover:bg-white/60"
-              >
-                Create account
-              </Link>
-            </div>
-          </div>
-
-          {/* Feedback (after download) */}
-          <FeedbackBox visible={showFeedback} onClose={() => setShowFeedback(false)} />
-        </div>
-
-        {/* Steps column (compact & vertical) */}
-        <aside className="space-y-3">
-          <Step icon="↑" title="1. Upload" desc="Select or drag & drop (PDF, DOCX, PPTX)" />
-          <Step icon="✦" title="2. AI clean" desc="Remove hidden data & fix mistakes" />
-          <Step icon="↓" title="3. Download" desc="Ready-to-share, layout preserved" />
-        </aside>
+    <main className="mx-auto max-w-[1100px] px-4 py-10 md:py-14">
+      {/* HERO container (dropzone) */}
+      <section className="rounded-[24px] border border-indigo-100 bg-gradient-to-b from-indigo-600/15 via-indigo-500/10 to-violet-500/10 p-6 md:p-8">
+        <DropzoneUploader onDone={() => setShowFeedback(true)} />
+        <FeedbackBox visible={showFeedback} onClose={() => setShowFeedback(false)} />
       </section>
 
-      {/* WHY + REVIEWS (social proof moved up) */}
+      {/* HOW TO — liste + visuel DANS LE MÊME ENCADRÉ (visuel à droite) */}
+      <section className="mt-12">
+        <h2 className="text-center text-2xl font-bold">How to use DocSafe</h2>
+
+        <div className="mt-6 overflow-hidden rounded-2xl border border-slate-200 bg-white">
+          <div className="grid items-stretch md:grid-cols-[1fr,360px]">
+            {/* Étapes */}
+            <ol className="divide-y divide-slate-200">
+              {[
+                {
+                  n: "1",
+                  title: 'Click “Select a file” or drag & drop.',
+                  sub: "Choose a PDF, DOCX, or PPTX and drop it in the box above.",
+                },
+                {
+                  n: "2",
+                  title: "We process your document automatically.",
+                  sub: "Hidden data is removed and obvious mistakes are fixed while preserving layout.",
+                },
+                {
+                  n: "3",
+                  title: "Download your cleaned file.",
+                  sub: "We keep the original format and append _cleaned to the filename.",
+                },
+                {
+                  n: "4",
+                  title: "Share it with confidence.",
+                  sub: "Ready-to-share output, with metadata and comments stripped.",
+                },
+              ].map(({ n, title, sub }) => (
+                <li
+                  key={n}
+                  className="flex items-start gap-3 px-5 py-4"
+                >
+                  <span className="mt-0.5 w-6 shrink-0 text-lg font-semibold leading-6 text-slate-400">
+                    {n}
+                  </span>
+                  <div className="min-w-0">
+                    <p className="truncate font-semibold text-slate-900">{title}</p>
+                    <p className="mt-0.5 text-xs text-slate-600">{sub}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+
+            {/* Visuel à droite, centré verticalement et séparé par une bordure */}
+            <div className="border-t border-slate-200 p-6 md:border-t-0 md:border-l md:p-0">
+              <div className="flex h-full items-center justify-center">
+                <div className="grid h-56 w-[320px] place-items-center rounded-2xl bg-white shadow-sm ring-1 ring-indigo-100">
+                  <div className="text-6xl">📑✨</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* BENEFITS */}
       <section className="mt-12">
         <h2 className="text-center text-2xl font-bold">Why use DocSafe?</h2>
-
-        {/* Social proof first */}
-        <div className="mx-auto mt-6 grid max-w-3xl gap-4 md:grid-cols-3">
-          <ReviewCard title="DocSafe Reviews" subtitle="44 reviews • ★★★★☆" />
-          <ReviewCard title="Capterra" subtitle="23 ratings • ★★★★☆" />
-          <ReviewCard title="Workspace Marketplace" subtitle="10,000,000+ users • ★★★★☆" />
-        </div>
-
-        {/* Benefits */}
         <div className="mt-6 grid gap-4 md:grid-cols-2">
           <Benefit icon="🛡️" title="Privacy & Security">
-            Files are processed securely and deleted after processing. We never use your data to train models.
+            Files are processed securely and deleted after processing. We never use your data to
+            train models.
           </Benefit>
           <Benefit icon="✍️" title="Professional result">
             Deliver polished documents that inspire trust with clear, correct writing.
@@ -287,9 +451,18 @@ export default function DocSafePage() {
         </div>
       </section>
 
+      {/* REVIEWS */}
+      <section className="mt-12">
+        <div className="mx-auto grid max-w-3xl gap-4 md:grid-cols-3">
+          <ReviewCard title="DocSafe Reviews" subtitle="44 reviews • ★★★★☆" />
+          <ReviewCard title="Capterra" subtitle="23 ratings • ★★★★☆" />
+          <ReviewCard title="Workspace Marketplace" subtitle="1,000+ users • ★★★★☆" />
+        </div>
+      </section>
+
       {/* FAQ */}
       <section className="mt-12">
-        <h3 className="mb-3 text-xl font-bold text-slate-900">Frequently asked questions</h3>
+        <h3 className="mb-3 text-xl font-bold text-slate-900">Got questions?</h3>
         <div className="space-y-3">
           <FAQItem
             q="Is my data deleted after upload?"
@@ -310,22 +483,7 @@ export default function DocSafePage() {
           />
         </div>
       </section>
-
-      {/* Strong CTAs at the end */}
-      <section className="mt-10 flex flex-wrap items-center justify-center gap-3">
-        <Link
-          href="/sign-up"
-          className="rounded-xl bg-indigo-600 px-5 py-2.5 text-sm font-semibold text-white hover:bg-indigo-500"
-        >
-          Create account
-        </Link>
-        <Link
-          href="/pricing"
-          className="rounded-xl bg-slate-900 px-5 py-2.5 text-sm font-semibold text-white hover:bg-slate-800"
-        >
-          See pricing
-        </Link>
-      </section>
     </main>
   );
 }
+

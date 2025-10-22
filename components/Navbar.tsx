@@ -5,8 +5,8 @@ import { useEffect, useRef, useState } from "react";
 import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 
 export default function Navbar() {
-  const [openMega, setOpenMega] = useState(false); // mega-menu desktop
-  const [openMobile, setOpenMobile] = useState(false); // hamburger mobile
+  const [openMega, setOpenMega] = useState(false);
+  const [openMobile, setOpenMobile] = useState(false);
   const wrapRef = useRef<HTMLDivElement>(null);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -41,11 +41,15 @@ export default function Navbar() {
 
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-white/90 backdrop-blur supports-[backdrop-filter]:bg-white/75">
-      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3 md:px-6">
+      <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-4 md:px-6 md:py-5">
         {/* LEFT: logo */}
         <div className="flex items-center gap-4">
           <Link href="/" className="flex shrink-0 items-center">
-            <img src="/logo-mindorion.png" alt="Mindorion" className="h-10 w-auto md:h-12" />
+            <img
+              src="/logo-mindorion.png"
+              alt="Mindorion"
+              className="h-9 w-auto md:h-34 lg:h-36 object-contain shrink-0"
+            />
           </Link>
         </div>
 
@@ -168,7 +172,12 @@ export default function Navbar() {
           className="inline-flex items-center rounded-md border px-3 py-2 text-slate-700 md:hidden"
         >
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-            <path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+            <path
+              d="M4 6h16M4 12h16M4 18h16"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+            />
           </svg>
         </button>
       </div>
@@ -234,3 +243,4 @@ export default function Navbar() {
     </header>
   );
 }
+
